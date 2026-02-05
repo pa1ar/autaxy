@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { App } from '../components/App';
+---
+
+<BaseLayout title="Autaxy - Apple Financial Report to PDF">
+  <App client:load />
+</BaseLayout>
+
+<script>
+  import { inject } from '@vercel/analytics';
+  inject();
+</script>
