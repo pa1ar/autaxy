@@ -6,12 +6,19 @@ import type { BusinessSettings } from './storage';
 import type { Language } from './i18n';
 import { t } from './i18n';
 
+// styles matching the original HTML exactly
 const pdfStyles = `
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
   .pdf-preview {
     background: white;
     max-width: 800px;
-    margin: 0 auto;
+    margin: 20px auto;
     padding: 30px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.1);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
     font-size: 10px;
     line-height: 1.2;
