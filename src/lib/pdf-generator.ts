@@ -6,140 +6,35 @@ import type { BusinessSettings } from './storage';
 import type { Language } from './i18n';
 import { t } from './i18n';
 
-// styles matching the original HTML exactly
-const pdfStyles = `
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  .pdf-preview {
-    background: white;
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 30px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-    font-size: 10px;
-    line-height: 1.2;
-  }
-  .pdf-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 25px;
-  }
-  .sender-info {
-    text-align: right;
-    font-size: 9px;
-  }
-  .recipient-info {
-    margin-bottom: 20px;
-  }
-  .invoice-details {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  .invoice-details-right {
-    width: 50%;
-    font-size: 9px;
-  }
-  .invoice-details-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 2px;
-  }
-  .invoice-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 15px 0;
-  }
-  .invoice-table th,
-  .invoice-table td {
-    border: 1px solid #ccc;
-    padding: 4px 6px;
-    text-align: left;
-    font-size: 9px;
-  }
-  .invoice-table th {
-    background: #f8f8f8;
-    font-weight: bold;
-  }
-  .invoice-table td:last-child,
-  .invoice-table th:last-child {
-    text-align: right;
-  }
-  .text-right {
-    text-align: right;
-  }
-  .text-center {
-    text-align: center;
-  }
-  .summary-section {
-    display: flex;
-    justify-content: flex-end;
-    margin: 15px 0;
-  }
-  .summary-box {
-    width: 180px;
-    border-top: 1px solid #ccc;
-    padding-top: 8px;
-  }
-  .summary-row {
-    display: flex;
-    justify-content: space-between;
-    margin: 3px 0;
-    font-size: 9px;
-  }
-  .summary-total {
-    font-weight: bold;
-    border-top: 1px solid #ccc;
-    padding-top: 4px;
-    margin-top: 4px;
-  }
-  .tax-note {
-    margin-top: 20px;
-    font-size: 9px;
-  }
-  .footer-section {
-    margin-top: 25px;
-    border-top: 1px solid #ccc;
-    padding-top: 15px;
-    font-size: 8px;
-    color: #666;
-  }
-  .footer-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-  }
-  .footer-right {
-    font-size: 7px;
-    color: #999;
-    text-align: right;
-  }
-  .footer-center {
-    text-align: center;
-    margin-top: 15px;
-    font-size: 7px;
-    color: #999;
-  }
-  .title {
-    margin: 20px 0 8px 0;
-    font-size: 12px;
-    font-weight: bold;
-  }
-  .subtitle {
-    margin-bottom: 10px;
-    font-size: 9px;
-    color: #666;
-  }
-  .booking-hint {
-    margin-bottom: 15px;
-    font-size: 9px;
-    color: #333;
-  }
-`;
+// inline styles for html2canvas compatibility (it doesn't read CSS from <style> tags in iframes)
+const S = {
+  preview: 'background: white; max-width: 800px; margin: 20px auto; padding: 30px; box-shadow: 0 0 20px rgba(0,0,0,0.1); font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Arial, sans-serif; font-size: 10px; line-height: 1.2;',
+  header: 'display: flex; justify-content: space-between; margin-bottom: 25px;',
+  sender: 'text-align: right; font-size: 9px;',
+  recipient: 'margin-bottom: 20px;',
+  details: 'display: flex; justify-content: space-between; margin-bottom: 20px;',
+  detailsRight: 'width: 50%; font-size: 9px;',
+  detailsRow: 'display: flex; justify-content: space-between; margin-bottom: 2px;',
+  table: 'width: 100%; border-collapse: collapse; margin: 15px 0;',
+  th: 'border: 1px solid #ccc; padding: 4px 6px; text-align: left; font-size: 9px; background: #f8f8f8; font-weight: bold;',
+  thRight: 'border: 1px solid #ccc; padding: 4px 6px; text-align: right; font-size: 9px; background: #f8f8f8; font-weight: bold;',
+  thCenter: 'border: 1px solid #ccc; padding: 4px 6px; text-align: center; font-size: 9px; background: #f8f8f8; font-weight: bold;',
+  td: 'border: 1px solid #ccc; padding: 4px 6px; text-align: left; font-size: 9px;',
+  tdRight: 'border: 1px solid #ccc; padding: 4px 6px; text-align: right; font-size: 9px;',
+  tdCenter: 'border: 1px solid #ccc; padding: 4px 6px; text-align: center; font-size: 9px;',
+  summarySection: 'display: flex; justify-content: flex-end; margin: 15px 0;',
+  summaryBox: 'width: 180px; border-top: 1px solid #ccc; padding-top: 8px;',
+  summaryRow: 'display: flex; justify-content: space-between; margin: 3px 0; font-size: 9px;',
+  summaryTotal: 'display: flex; justify-content: space-between; margin: 3px 0; font-size: 9px; font-weight: bold; border-top: 1px solid #ccc; padding-top: 4px; margin-top: 4px;',
+  taxNote: 'margin-top: 20px; font-size: 9px;',
+  footer: 'margin-top: 25px; border-top: 1px solid #ccc; padding-top: 15px; font-size: 8px; color: #666;',
+  footerContent: 'display: flex; justify-content: space-between; align-items: flex-end;',
+  footerRight: 'font-size: 7px; color: #999; text-align: right;',
+  footerCenter: 'text-align: center; margin-top: 15px; font-size: 7px; color: #999;',
+  title: 'margin: 20px 0 8px 0; font-size: 12px; font-weight: bold;',
+  subtitle: 'margin-bottom: 10px; font-size: 9px; color: #666;',
+  bookingHint: 'margin-bottom: 15px; font-size: 9px; color: #333;',
+};
 
 export function generatePreviewHtml(
   data: AppleReportData,
@@ -194,11 +89,10 @@ export function generatePreviewHtml(
   const bookingShort = bookingHint.split('(')[1]?.replace(')', '') || '';
 
   return `
-<style>${pdfStyles}</style>
-<div class="pdf-preview">
-  <div class="pdf-header">
+<div class="pdf-preview" style="${S.preview}">
+  <div style="${S.header}">
     <div></div>
-    <div class="sender-info">
+    <div style="${S.sender}">
       <strong>Apple Distribution International Ltd.</strong><br>
       Hollyhill Industrial Estate<br>
       Hollyhill, Cork<br>
@@ -207,84 +101,84 @@ export function generatePreviewHtml(
     </div>
   </div>
 
-  <div class="recipient-info">
+  <div style="${S.recipient}">
     ${recipient}
   </div>
 
-  <div class="invoice-details">
+  <div style="${S.details}">
     <div style="width: 50%;"></div>
-    <div class="invoice-details-right">
-      ${settings.appleVendorId ? `<div class="invoice-details-row"><span>${t('pdfVendorId', lang)}:</span> <span>${settings.appleVendorId}</span></div>` : ''}
-      <div class="invoice-details-row">
+    <div style="${S.detailsRight}">
+      ${settings.appleVendorId ? `<div style="${S.detailsRow}"><span>${t('pdfVendorId', lang)}:</span> <span>${settings.appleVendorId}</span></div>` : ''}
+      <div style="${S.detailsRow}">
         <span>${t('pdfReportId', lang)}:</span> <span>${data.reportId}</span>
       </div>
-      <div class="invoice-details-row">
+      <div style="${S.detailsRow}">
         <span>${t('pdfDate', lang)}:</span> <span>${data.endDate}</span>
       </div>
-      <div class="invoice-details-row">
+      <div style="${S.detailsRow}">
         <span>${t('pdfPeriod', lang)}:</span> <span>${data.startDate} - ${data.endDate}</span>
       </div>
     </div>
   </div>
 
-  <h2 class="title">${t('pdfTitle', lang)} ${data.reportId}</h2>
-  <p class="subtitle">${t('pdfSubtitle', lang)} (${lang === 'de' ? 'Quelle' : 'Source'}: Apple Financial Report)</p>
-  <p class="booking-hint"><strong>${t('pdfBookingHint', lang)}:</strong> ${bookingHint}</p>
+  <h2 style="${S.title}">${t('pdfTitle', lang)} ${data.reportId}</h2>
+  <p style="${S.subtitle}">${t('pdfSubtitle', lang)} (${lang === 'de' ? 'Quelle' : 'Source'}: Apple Financial Report)</p>
+  <p style="${S.bookingHint}"><strong>${t('pdfBookingHint', lang)}:</strong> ${bookingHint}</p>
 
-  <table class="invoice-table">
+  <table style="${S.table}">
     <thead>
       <tr>
-        <th style="width: 8%;">${t('pdfPos', lang)}</th>
-        <th style="width: 50%;">${t('pdfDescription', lang)}</th>
-        <th style="width: 10%;" class="text-right">${t('pdfQuantity', lang)}</th>
-        <th style="width: 12%;" class="text-center">${t('pdfUnit', lang)}</th>
-        <th style="width: 10%;" class="text-right">${t('pdfUnitPrice', lang)}</th>
-        <th style="width: 10%;">${t('pdfTotal', lang)}</th>
+        <th style="${S.th} width: 8%;">${t('pdfPos', lang)}</th>
+        <th style="${S.th} width: 50%;">${t('pdfDescription', lang)}</th>
+        <th style="${S.thRight} width: 10%;">${t('pdfQuantity', lang)}</th>
+        <th style="${S.thCenter} width: 12%;">${t('pdfUnit', lang)}</th>
+        <th style="${S.thRight} width: 10%;">${t('pdfUnitPrice', lang)}</th>
+        <th style="${S.thRight} width: 10%;">${t('pdfTotal', lang)}</th>
       </tr>
     </thead>
     <tbody>
       ${tableRows.map(row => `
       <tr>
-        <td>${row.pos}</td>
-        <td>${row.description}</td>
-        <td class="text-right">${row.quantity}</td>
-        <td class="text-center">${row.unit}</td>
-        <td class="text-right">${row.price}</td>
-        <td>${row.total}</td>
+        <td style="${S.td}">${row.pos}</td>
+        <td style="${S.td}">${row.description}</td>
+        <td style="${S.tdRight}">${row.quantity}</td>
+        <td style="${S.tdCenter}">${row.unit}</td>
+        <td style="${S.tdRight}">${row.price}</td>
+        <td style="${S.tdRight}">${row.total}</td>
       </tr>
       `).join('')}
     </tbody>
   </table>
 
-  <div class="summary-section">
-    <div class="summary-box">
-      <div class="summary-row">
+  <div style="${S.summarySection}">
+    <div style="${S.summaryBox}">
+      <div style="${S.summaryRow}">
         <span>${t('pdfSubtotal', lang)}</span>
         <span>${formatAmountGerman(calculatedTotal)} EUR</span>
       </div>
-      <div class="summary-row summary-total">
+      <div style="${S.summaryTotal}">
         <strong>${t('pdfGrandTotal', lang)}</strong>
         <strong>${formatAmountGerman(totalAmount)} EUR</strong>
       </div>
     </div>
   </div>
 
-  <div class="tax-note">
+  <div style="${S.taxNote}">
     <strong>Steuerhinweis:</strong> ${t('pdfTaxNote', lang)}
   </div>
 
-  <div class="footer-section">
-    <div class="footer-content">
+  <div style="${S.footer}">
+    <div style="${S.footerContent}">
       <div>
         <strong>${t('pdfDocType', lang)}:</strong> ${t('pdfDocTypeValue', lang)}<br>
         <strong>${t('pdfSource', lang)}:</strong> ${t('pdfSourceValue', lang)}<br>
         <strong>Apple VAT ID:</strong> IE9700053D
       </div>
-      <div class="footer-right">
+      <div style="${S.footerRight}">
         ${lang === 'de' ? 'Für Buchhaltung' : 'For accounting'}: ${bookingShort}<br>
       </div>
     </div>
-    <div class="footer-center">
+    <div style="${S.footerCenter}">
       ${t('pdfCreated', lang)}: ${today} | ${t('pdfPage', lang)} 1/1
     </div>
   </div>
