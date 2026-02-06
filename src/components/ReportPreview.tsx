@@ -5,7 +5,7 @@ import type { AppleReportData } from '../lib/parsers/apple';
 import type { BusinessSettings } from '../lib/storage';
 import type { Language } from '../lib/i18n';
 import { t } from '../lib/i18n';
-import { generatePreviewHtml, generatePdf } from '../lib/pdf-generator';
+import { generatePreviewHtml, generatePdf, PDF_BASE_CSS, PDF_PRINT_CSS, TABLE_CSS } from '../lib/pdf-generator';
 import { trackPdfGenerated } from '../lib/analytics';
 
 interface ReportPreviewProps {
@@ -29,7 +29,7 @@ export function ReportPreview({ data, settings, language }: ReportPreviewProps) 
     if (!doc) return;
 
     doc.open();
-    doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;">${html}</body></html>`);
+    doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${PDF_BASE_CSS}${TABLE_CSS}${PDF_PRINT_CSS}</style></head><body>${html}</body></html>`);
     doc.close();
 
     // adjust iframe height to content
@@ -45,15 +45,18 @@ export function ReportPreview({ data, settings, language }: ReportPreviewProps) 
     setTimeout(adjustHeight, 100);
   }, [html]);
 
-  const handleGeneratePdf = async () => {
+  const handlePrintPdf = async () => {
     const iframe = iframeRef.current;
-    if (!iframe?.contentDocument?.body) return;
+    if (!iframe) return;
 
-    const previewElement = iframe.contentDocument.body.querySelector('.pdf-preview') as HTMLElement;
-    if (!previewElement) return;
+    const doc = iframe.contentDocument;
+    if (!doc) return;
 
     try {
-      await generatePdf(previewElement, data);
+      const previewElement = doc.querySelector('.pdf-preview') as HTMLElement;
+      if (!previewElement) return;
+
+      await generatePdf(previewElement);
       trackPdfGenerated('apple', data.summary.totalPartnerShare);
     } catch (error) {
       console.error('PDF generation failed:', error);
@@ -65,9 +68,14 @@ export function ReportPreview({ data, settings, language }: ReportPreviewProps) 
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>{t('preview', language)}</CardTitle>
-        <Button onClick={handleGeneratePdf}>
-          {t('generatePdf', language)}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button disabled title={t('generatePdfSoon', language)}>
+            {t('generatePdf', language)}
+          </Button>
+          <Button variant="secondary" onClick={handlePrintPdf}>
+            {t('printPdf', language)}
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">

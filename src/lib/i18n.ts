@@ -30,6 +30,8 @@ export const translations = {
     // Actions
     processReport: 'Report verarbeiten',
     generatePdf: 'PDF erstellen',
+    printPdf: 'Drucken / Als PDF speichern',
+    generatePdfSoon: 'PDF erstellen (kommt bald)',
     preview: 'Vorschau',
 
     // Messages
@@ -104,6 +106,8 @@ export const translations = {
     // Actions
     processReport: 'Process Report',
     generatePdf: 'Generate PDF',
+    printPdf: 'Print / Save as PDF',
+    generatePdfSoon: 'Generate PDF (coming soon)',
     preview: 'Preview',
 
     // Messages

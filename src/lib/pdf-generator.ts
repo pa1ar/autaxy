@@ -1,12 +1,36 @@
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
 import type { AppleReportData } from './parsers/apple';
 import { formatAmountGerman } from './parsers/apple';
 import type { BusinessSettings } from './storage';
 import type { Language } from './i18n';
 import { t } from './i18n';
 
-// inline styles for html2canvas compatibility (it doesn't read CSS from <style> tags in iframes)
+export const PDF_BASE_CSS = `
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { margin: 0; padding: 0; }
+`;
+
+// css for table borders - must be in a <style> tag (not inline) for html2canvas
+export const TABLE_CSS = `
+.invoice-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+.invoice-table th, .invoice-table td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; font-size: 9px; }
+.invoice-table th { background: #f8f8f8; font-weight: bold; }
+.invoice-table .al-r { text-align: right; }
+.invoice-table .al-c { text-align: center; }
+`;
+
+export const PDF_PRINT_CSS = `
+@page { size: A4; margin: 12mm; }
+@media print {
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .pdf-preview {
+    max-width: none !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+}
+`;
+
+// inline styles for non-table elements (these work fine with html2canvas)
 const S = {
   preview: 'background: white; max-width: 800px; margin: 20px auto; padding: 30px; box-shadow: 0 0 20px rgba(0,0,0,0.1); font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Arial, sans-serif; font-size: 10px; line-height: 1.2;',
   header: 'display: flex; justify-content: space-between; margin-bottom: 25px;',
@@ -15,13 +39,6 @@ const S = {
   details: 'display: flex; justify-content: space-between; margin-bottom: 20px;',
   detailsRight: 'width: 50%; font-size: 9px;',
   detailsRow: 'display: flex; justify-content: space-between; margin-bottom: 2px;',
-  table: 'width: 100%; border-collapse: collapse; margin: 15px 0;',
-  th: 'border: 1px solid #ccc; padding: 4px 6px; text-align: left; font-size: 9px; background: #f8f8f8; font-weight: bold;',
-  thRight: 'border: 1px solid #ccc; padding: 4px 6px; text-align: right; font-size: 9px; background: #f8f8f8; font-weight: bold;',
-  thCenter: 'border: 1px solid #ccc; padding: 4px 6px; text-align: center; font-size: 9px; background: #f8f8f8; font-weight: bold;',
-  td: 'border: 1px solid #ccc; padding: 4px 6px; text-align: left; font-size: 9px;',
-  tdRight: 'border: 1px solid #ccc; padding: 4px 6px; text-align: right; font-size: 9px;',
-  tdCenter: 'border: 1px solid #ccc; padding: 4px 6px; text-align: center; font-size: 9px;',
   summarySection: 'display: flex; justify-content: flex-end; margin: 15px 0;',
   summaryBox: 'width: 180px; border-top: 1px solid #ccc; padding-top: 8px;',
   summaryRow: 'display: flex; justify-content: space-between; margin: 3px 0; font-size: 9px;',
@@ -125,26 +142,26 @@ export function generatePreviewHtml(
   <p style="${S.subtitle}">${t('pdfSubtitle', lang)} (${lang === 'de' ? 'Quelle' : 'Source'}: Apple Financial Report)</p>
   <p style="${S.bookingHint}"><strong>${t('pdfBookingHint', lang)}:</strong> ${bookingHint}</p>
 
-  <table style="${S.table}">
+  <table class="invoice-table">
     <thead>
       <tr>
-        <th style="${S.th} width: 8%;">${t('pdfPos', lang)}</th>
-        <th style="${S.th} width: 50%;">${t('pdfDescription', lang)}</th>
-        <th style="${S.thRight} width: 10%;">${t('pdfQuantity', lang)}</th>
-        <th style="${S.thCenter} width: 12%;">${t('pdfUnit', lang)}</th>
-        <th style="${S.thRight} width: 10%;">${t('pdfUnitPrice', lang)}</th>
-        <th style="${S.thRight} width: 10%;">${t('pdfTotal', lang)}</th>
+        <th style="width: 8%;">${t('pdfPos', lang)}</th>
+        <th style="width: 50%;">${t('pdfDescription', lang)}</th>
+        <th class="al-r" style="width: 10%;">${t('pdfQuantity', lang)}</th>
+        <th class="al-c" style="width: 12%;">${t('pdfUnit', lang)}</th>
+        <th class="al-r" style="width: 10%;">${t('pdfUnitPrice', lang)}</th>
+        <th class="al-r" style="width: 10%;">${t('pdfTotal', lang)}</th>
       </tr>
     </thead>
     <tbody>
       ${tableRows.map(row => `
       <tr>
-        <td style="${S.td}">${row.pos}</td>
-        <td style="${S.td}">${row.description}</td>
-        <td style="${S.tdRight}">${row.quantity}</td>
-        <td style="${S.tdCenter}">${row.unit}</td>
-        <td style="${S.tdRight}">${row.price}</td>
-        <td style="${S.tdRight}">${row.total}</td>
+        <td>${row.pos}</td>
+        <td>${row.description}</td>
+        <td class="al-r">${row.quantity}</td>
+        <td class="al-c">${row.unit}</td>
+        <td class="al-r">${row.price}</td>
+        <td class="al-r">${row.total}</td>
       </tr>
       `).join('')}
     </tbody>
@@ -187,43 +204,13 @@ export function generatePreviewHtml(
 }
 
 export async function generatePdf(
-  element: HTMLElement,
-  data: AppleReportData
+  element: HTMLElement
 ): Promise<void> {
-  const canvas = await html2canvas(element, {
-    scale: 1.5,
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: '#ffffff',
-    removeContainer: true,
-    imageTimeout: 0,
-    logging: false
-  });
-
-  const imgData = canvas.toDataURL('image/jpeg', 0.85);
-  const pdf = new jsPDF({
-    orientation: 'p',
-    unit: 'mm',
-    format: 'a4',
-    compress: true
-  });
-
-  const imgWidth = 210;
-  const pageHeight = 295;
-  const imgHeight = (canvas.height * imgWidth) / canvas.width;
-  let heightLeft = imgHeight;
-  let position = 0;
-
-  pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-  heightLeft -= pageHeight;
-
-  while (heightLeft >= 0) {
-    position = heightLeft - imgHeight;
-    pdf.addPage();
-    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+  const view = element.ownerDocument.defaultView;
+  if (!view) {
+    throw new Error('Print view is not available');
   }
 
-  const filename = `Apple_Financial_Report_${data.reportId}_${data.endDate.replace(/\./g, '-')}.pdf`;
-  pdf.save(filename);
+  view.focus();
+  view.print();
 }
