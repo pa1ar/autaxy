@@ -19,7 +19,7 @@ export function Card({
 
   return (
     <div
-      className={`bg-white rounded-xl shadow-sm border border-gray-200 ${paddings[padding]} ${className}`}
+      className={`card ${paddings[padding]} ${className}`}
       {...props}
     >
       {children}
@@ -37,7 +37,7 @@ export function CardHeader({ className = '', children, ...props }: HTMLAttribute
 
 export function CardTitle({ className = '', children, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={`text-lg font-semibold text-gray-900 ${className}`} {...props}>
+    <h3 className={`text-lg font-semibold ${className}`} {...props}>
       {children}
     </h3>
   );
@@ -45,7 +45,7 @@ export function CardTitle({ className = '', children, ...props }: HTMLAttributes
 
 export function CardDescription({ className = '', children, ...props }: HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={`text-sm text-gray-500 mt-1 ${className}`} {...props}>
+    <p className={`text-sm section-subtle mt-1 ${className}`} {...props}>
       {children}
     </p>
   );

@@ -29,3 +29,6 @@ Vercel Analytics. Events: page_view, report_parsed, pdf_generated, settings_save
 
 ## Business Settings Storage
 localStorage key: autaxy_business_settings
+
+## UI Remark
+- Keep scrollbar space reserved to avoid page jump when vertical scrollbar appears: `html { scrollbar-gutter: stable; }`

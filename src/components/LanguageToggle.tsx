@@ -7,14 +7,14 @@ interface LanguageToggleProps {
 
 export function LanguageToggle({ language, onChange }: LanguageToggleProps) {
   return (
-    <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+    <div className="flex items-center gap-0 app-tablist">
       <button
         type="button"
         onClick={() => onChange('de')}
-        className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+        className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
           language === 'de'
-            ? 'bg-white text-gray-900 shadow-sm'
-            : 'text-gray-600 hover:text-gray-900'
+            ? 'app-tab-active'
+            : 'app-tab-idle'
         }`}
       >
         DE
@@ -22,10 +22,10 @@ export function LanguageToggle({ language, onChange }: LanguageToggleProps) {
       <button
         type="button"
         onClick={() => onChange('en')}
-        className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+        className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
           language === 'en'
-            ? 'bg-white text-gray-900 shadow-sm'
-            : 'text-gray-600 hover:text-gray-900'
+            ? 'app-tab-active'
+            : 'app-tab-idle'
         }`}
       >
         EN

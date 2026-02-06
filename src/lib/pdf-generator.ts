@@ -1,3 +1,5 @@
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 import type { AppleReportData } from './parsers/apple';
 import { formatAmountGerman } from './parsers/apple';
 import type { BusinessSettings } from './storage';
@@ -9,10 +11,93 @@ export const PDF_BASE_CSS = `
 body { margin: 0; padding: 0; }
 `;
 
+// Style context from legacy standalone HTML (kept for A/B compatibility testing).
+export const LEGACY_PDF_CSS = `
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #fff;
+  min-height: 100vh;
+  padding: 20px;
+}
+.pdf-preview {
+  background: white;
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 30px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  font-size: 10px;
+  line-height: 1.2;
+}
+.pdf-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 25px;
+}
+.sender-info {
+  text-align: right;
+  font-size: 9px;
+}
+.recipient-info { margin-bottom: 20px; }
+.invoice-details {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+.invoice-table th,
+.invoice-table td {
+  border: 1px solid #ccc;
+  padding: 5px 8px 9px;
+  text-align: left;
+  font-size: 9px;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+.invoice-table th {
+  background: #f8f8f8;
+  font-weight: bold;
+}
+.summary-section {
+  display: flex;
+  justify-content: flex-end;
+  margin: 15px 0;
+}
+.summary-box {
+  width: 180px;
+  border-top: 1px solid #ccc;
+  padding-top: 8px;
+}
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 3px 0;
+  font-size: 9px;
+}
+.summary-total {
+  font-weight: bold;
+  border-top: 1px solid #ccc;
+  padding-top: 4px;
+  margin-top: 4px;
+}
+.footer-section {
+  margin-top: 25px;
+  border-top: 1px solid #ccc;
+  padding-top: 15px;
+  font-size: 8px;
+  color: #666;
+}
+`;
+
 // css for table borders - must be in a <style> tag (not inline) for html2canvas
 export const TABLE_CSS = `
 .invoice-table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-.invoice-table th, .invoice-table td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; font-size: 9px; }
+.invoice-table th, .invoice-table td { border: 1px solid #ccc; padding: 5px 8px 9px; text-align: left; font-size: 9px; line-height: 1.4; vertical-align: middle; }
 .invoice-table th { background: #f8f8f8; font-weight: bold; }
 .invoice-table .al-r { text-align: right; }
 .invoice-table .al-c { text-align: center; }
@@ -20,6 +105,12 @@ export const TABLE_CSS = `
 
 export const PDF_PRINT_CSS = `
 @page { size: A4; margin: 12mm; }
+@media screen {
+  .pdf-preview {
+    border-radius: 16px;
+    overflow: hidden;
+  }
+}
 @media print {
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .pdf-preview {
@@ -213,4 +304,47 @@ export async function generatePdf(
 
   view.focus();
   view.print();
+}
+
+// Legacy rasterized export path from the original standalone HTML
+export async function generatePdfLegacy(
+  element: HTMLElement,
+  data: AppleReportData
+): Promise<void> {
+  const canvas = await html2canvas(element, {
+    scale: 1.5,
+    useCORS: true,
+    allowTaint: true,
+    backgroundColor: '#ffffff',
+    removeContainer: true,
+    imageTimeout: 0,
+    logging: false
+  });
+
+  const imgData = canvas.toDataURL('image/jpeg', 0.85);
+  const pdf = new jsPDF({
+    orientation: 'p',
+    unit: 'mm',
+    format: 'a4',
+    compress: true
+  });
+
+  const imgWidth = 210;
+  const pageHeight = 295;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while (heightLeft >= 0) {
+    position = heightLeft - imgHeight;
+    pdf.addPage();
+    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+  }
+
+  const filename = `Apple_Financial_Report_${data.reportId}_${data.endDate.replace(/\./g, '-')}.pdf`;
+  pdf.save(filename);
 }

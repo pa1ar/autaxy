@@ -68,21 +68,16 @@ export function ReportPreview({ data, settings, language }: ReportPreviewProps) 
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>{t('preview', language)}</CardTitle>
-        <div className="flex items-center gap-2">
-          <Button disabled title={t('generatePdfSoon', language)}>
-            {t('generatePdf', language)}
-          </Button>
-          <Button variant="secondary" onClick={handlePrintPdf}>
-            {t('printPdf', language)}
-          </Button>
-        </div>
+        <Button onClick={handlePrintPdf}>
+          {t('printPdf', language)}
+        </Button>
       </CardHeader>
       <CardContent>
-        <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+        <div className="overflow-hidden rounded-2xl">
           <iframe
             ref={iframeRef}
             title="PDF Preview"
-            style={{ width: '100%', height: iframeHeight, border: 'none' }}
+            style={{ width: '100%', height: iframeHeight, border: 'none', borderRadius: '16px' }}
           />
         </div>
       </CardContent>

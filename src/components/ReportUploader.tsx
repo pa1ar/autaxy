@@ -72,8 +72,8 @@ export function ReportUploader({ language, onTextChange, onProcess }: ReportUplo
       </CardHeader>
       <CardContent>
         <div
-          className={`relative border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors mb-4 ${
-            isDragging ? 'border-blue-500 bg-blue-50' : fileName ? 'border-green-500 bg-green-50' : 'border-gray-300 hover:border-gray-400'
+          className={`relative concave-well p-8 text-center cursor-pointer transition-colors mb-4 ${
+            isDragging ? 'ring-2 ring-amber-300' : fileName ? 'ring-1 ring-green-300' : ''
           }`}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -90,17 +90,17 @@ export function ReportUploader({ language, onTextChange, onProcess }: ReportUplo
           {fileName ? (
             <div>
               <div className="text-green-600 font-medium">{fileName}</div>
-              <div className="text-sm text-gray-500 mt-1">Click to change file</div>
+              <div className="text-sm section-subtle mt-1">Click to change file</div>
             </div>
           ) : (
             <div>
-              <div className="text-gray-600">{t('dropzone', language)}</div>
-              <div className="text-sm text-gray-400 mt-1">.csv, .txt</div>
+              <div className="section-subtle">{t('dropzone', language)}</div>
+              <div className="text-sm section-subtle mt-1">.csv, .txt</div>
             </div>
           )}
         </div>
 
-        <div className="text-center text-gray-400 text-sm mb-4">{t('dropzoneOr', language)}</div>
+        <div className="text-center section-subtle text-sm mb-4">{t('dropzoneOr', language)}</div>
 
         <Textarea
           label={t('pasteLabel', language)}
@@ -111,7 +111,8 @@ export function ReportUploader({ language, onTextChange, onProcess }: ReportUplo
           rows={10}
         />
 
-        <div className="mt-4">
+        <div className="mt-4 flex items-center justify-between gap-4">
+          <p className="text-sm section-subtle">{t('privacyNote', language)}</p>
           <Button onClick={onProcess} disabled={!text.trim()}>
             {t('processReport', language)}
           </Button>

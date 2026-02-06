@@ -10,13 +10,13 @@ export function Input({ label, error, className = '', id, ...props }: InputProps
   return (
     <div className="space-y-1">
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
+        <label htmlFor={inputId} className="block text-sm font-medium">
           {label}
         </label>
       )}
       <input
         id={inputId}
-        className={`w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${error ? 'border-red-500' : ''} ${className}`}
+        className={`w-full px-4 py-2.5 app-input ${error ? 'border-red-500' : ''} ${className}`}
         {...props}
       />
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -34,13 +34,13 @@ export function Textarea({ label, error, className = '', id, ...props }: Textare
   return (
     <div className="space-y-1">
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
+        <label htmlFor={inputId} className="block text-sm font-medium">
           {label}
         </label>
       )}
       <textarea
         id={inputId}
-        className={`w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm ${error ? 'border-red-500' : ''} ${className}`}
+        className={`w-full px-4 py-2.5 app-input font-mono text-sm ${error ? 'border-red-500' : ''} ${className}`}
         {...props}
       />
       {error && <p className="text-sm text-red-600">{error}</p>}

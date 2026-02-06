@@ -30,7 +30,7 @@ interface TabsListProps {
 
 export function TabsList({ children, className = '' }: TabsListProps) {
   return (
-    <div className={`flex gap-1 p-1 bg-gray-100 rounded-lg ${className}`}>
+    <div className={`flex gap-0 app-tablist ${className}`}>
       {children}
     </div>
   );
@@ -52,10 +52,10 @@ export function TabsTrigger({ value, children, className = '' }: TabsTriggerProp
     <button
       type="button"
       onClick={() => context.setActiveTab(value)}
-      className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+      className={`px-5 py-2 text-sm font-medium rounded-full transition-colors ${
         isActive
-          ? 'bg-white text-gray-900 shadow-sm'
-          : 'text-gray-600 hover:text-gray-900'
+          ? 'app-tab-active'
+          : 'app-tab-idle'
       } ${className}`}
     >
       {children}

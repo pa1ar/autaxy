@@ -3,11 +3,11 @@ export type Language = 'de' | 'en';
 export const translations = {
   de: {
     // Page
-    title: 'Apple Financial Report zu PDF Konverter',
-    subtitle: 'Konvertiere Apple Financial Reports in steuerlich korrekte PDFs',
+    title: 'autaxy',
+    subtitle: 'Steuerliche Report-Workflows in einem Tool',
 
     // Settings
-    settingsTitle: 'Firmendaten',
+    settingsTitle: 'Business Details',
     settingsDescription: 'Diese Daten werden lokal gespeichert und in der PDF verwendet.',
     companyName: 'Firmenname',
     street: 'Straße + Hausnummer',
@@ -20,8 +20,8 @@ export const translations = {
     settingsSaved: 'Einstellungen gespeichert',
 
     // Upload
-    uploadTitle: 'Apple Financial Report hochladen',
-    uploadDescription: 'Lade eine CSV-Datei hoch oder füge den Text direkt ein.',
+    uploadTitle: 'Report Input',
+    uploadDescription: 'CSV hochladen oder Report-Text direkt einfügen.',
     dropzone: 'CSV-Datei hierher ziehen oder klicken',
     dropzoneOr: 'oder',
     pasteLabel: 'Report-Text einfügen:',
@@ -79,12 +79,12 @@ export const translations = {
   },
   en: {
     // Page
-    title: 'Apple Financial Report to PDF Converter',
-    subtitle: 'Convert Apple Financial Reports into tax-compliant PDFs',
+    title: 'autaxy',
+    subtitle: 'tax report workflows',
 
     // Settings
     settingsTitle: 'Business Details',
-    settingsDescription: 'This data is stored locally and used in the PDF.',
+    settingsDescription: 'Fill out details that should appear on your reports.',
     companyName: 'Company Name',
     street: 'Street + Number',
     zipCity: 'ZIP + City',
@@ -96,9 +96,9 @@ export const translations = {
     settingsSaved: 'Settings saved',
 
     // Upload
-    uploadTitle: 'Upload Apple Financial Report',
-    uploadDescription: 'Upload a CSV file or paste the text directly.',
-    dropzone: 'Drag CSV file here or click to upload',
+    uploadTitle: 'Report Input',
+    uploadDescription: 'Load CSV or paste report text directly. The file is not sent to our servers but processed locally in your browser tab.',
+    dropzone: 'Drag CSV file here or click to select file from your computer',
     dropzoneOr: 'or',
     pasteLabel: 'Paste report text:',
     pastePlaceholder: 'Paste Apple Financial Report here (from FD_*.txt or .csv)',

@@ -11,7 +11,7 @@ interface ReportTabsProps {
 export function ReportTabs({ language, children }: ReportTabsProps) {
   return (
     <Tabs defaultValue="apple" className="w-full">
-      <TabsList className="mb-6">
+      <TabsList className="mb-6 w-full justify-start">
         <TabsTrigger value="apple">{t('tabApple', language)}</TabsTrigger>
         {/* future tabs: <TabsTrigger value="amazon">Amazon Settlement</TabsTrigger> */}
       </TabsList>

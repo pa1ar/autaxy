@@ -49,12 +49,12 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200">
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <header className="flex items-center justify-between mb-8">
+    <div className="app-shell">
+      <div className="app-container">
+        <header className="app-topbar">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('title', language)}</h1>
-            <p className="text-gray-600 mt-1">{t('subtitle', language)}</p>
+            <h1 className="brand-title">{t('title', language)}</h1>
+            <p className="section-subtle mt-2">{t('subtitle', language)}</p>
           </div>
           <LanguageToggle language={language} onChange={handleLanguageChange} />
         </header>
@@ -71,7 +71,7 @@ export function App() {
           </ReportTabs>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="px-4 py-3 rounded-2xl border" style={{ background: 'color-mix(in srgb, var(--color-error) 10%, white)', borderColor: 'color-mix(in srgb, var(--color-error) 28%, transparent)', color: 'color-mix(in srgb, var(--color-error) 85%, black)' }}>
               {error}
             </div>
           )}
@@ -81,9 +81,6 @@ export function App() {
           )}
         </div>
 
-        <footer className="mt-12 text-center text-sm text-gray-500">
-          <p>{t('privacyNote', language)}</p>
-        </footer>
       </div>
     </div>
   );
