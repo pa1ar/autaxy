@@ -106,14 +106,16 @@ export function BusinessSettings({ language, onSettingsChange }: BusinessSetting
               />
             </div>
           </div>
-          <div className="flex items-center gap-4 mt-6">
-            <Button onClick={handleSave}>{t('saveSettings', language)}</Button>
-            <span className="text-sm section-subtle">
-              Details are saved locally in your browser local storage. We never store anything or share with anyone the data that you enter on this page.
-            </span>
+          <div className="mt-6 flex flex-col items-end gap-2">
             {saved && (
               <span className="text-sm text-green-600">{t('settingsSaved', language)}</span>
             )}
+            <div className="w-full flex items-center justify-between gap-4">
+              <span className="text-sm section-subtle text-left">
+                Details are saved locally in your browser local storage. We never store anything or share with anyone the data that you enter on this page.
+              </span>
+              <Button onClick={handleSave}>{t('saveSettings', language)}</Button>
+            </div>
           </div>
           </CardContent>
         </div>

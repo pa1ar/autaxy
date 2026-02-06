@@ -71,45 +71,54 @@ export function ReportUploader({ language, onTextChange, onProcess }: ReportUplo
         <CardDescription>{t('uploadDescription', language)}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div
-          className={`relative concave-well p-8 text-center cursor-pointer transition-colors mb-4 ${
-            isDragging ? 'ring-2 ring-amber-300' : fileName ? 'ring-1 ring-green-300' : ''
-          }`}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".txt,.csv"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-          {fileName ? (
-            <div>
-              <div className="text-green-600 font-medium">{fileName}</div>
-              <div className="text-sm section-subtle mt-1">Click to change file</div>
-            </div>
-          ) : (
-            <div>
-              <div className="section-subtle">{t('dropzone', language)}</div>
-              <div className="text-sm section-subtle mt-1">.csv, .txt</div>
-            </div>
-          )}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-4 mb-4 items-stretch">
+          <div
+            className={`relative concave-well p-8 text-center cursor-pointer transition-colors min-h-[320px] flex items-center justify-center ${
+              isDragging ? 'ring-2 ring-amber-300' : fileName ? 'ring-1 ring-green-300' : ''
+            }`}
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".txt,.csv"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            {fileName ? (
+              <div>
+                <div className="text-green-600 font-medium">{fileName}</div>
+                <div className="text-sm section-subtle mt-1">Click to change file</div>
+              </div>
+            ) : (
+              <div>
+                <div className="section-subtle">{t('dropzone', language)}</div>
+                <div className="text-sm section-subtle mt-1">.csv, .txt</div>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-center section-subtle text-sm font-medium">
+            <span className="px-3 py-1 rounded-full border border-[color:color-mix(in_srgb,var(--color-base-content)_10%,transparent)] bg-white/70">
+              {t('dropzoneOr', language)}
+            </span>
+          </div>
+
+          <div className="concave-well p-4">
+            <Textarea
+              label={t('pasteLabel', language)}
+              value={text}
+              onChange={handleTextChange}
+              onPaste={handlePaste}
+              placeholder={t('pastePlaceholder', language)}
+              rows={10}
+              className="h-full min-h-[288px] yellow-scrollbar paste-textarea"
+            />
+          </div>
         </div>
-
-        <div className="text-center section-subtle text-sm mb-4">{t('dropzoneOr', language)}</div>
-
-        <Textarea
-          label={t('pasteLabel', language)}
-          value={text}
-          onChange={handleTextChange}
-          onPaste={handlePaste}
-          placeholder={t('pastePlaceholder', language)}
-          rows={10}
-        />
 
         <div className="mt-4 flex items-center justify-between gap-4">
           <p className="text-sm section-subtle">{t('privacyNote', language)}</p>
