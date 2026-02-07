@@ -29,7 +29,7 @@ export function ReportPreview({ data, settings, language }: ReportPreviewProps) 
     if (!doc) return;
 
     doc.open();
-    doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${PDF_BASE_CSS}${TABLE_CSS}${PDF_PRINT_CSS}</style></head><body>${html}</body></html>`);
+    doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Autaxy - tax automation by 1ar labs</title><style>${PDF_BASE_CSS}${TABLE_CSS}${PDF_PRINT_CSS}</style></head><body>${html}</body></html>`);
     doc.close();
 
     // adjust iframe height to content
