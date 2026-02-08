@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { LanguageToggle } from './LanguageToggle';
+import { ThemeToggle } from './ThemeToggle';
 import { BusinessSettings } from './BusinessSettings';
 import { ReportUploader } from './ReportUploader';
 import { ReportPreview } from './ReportPreview';
@@ -56,7 +57,10 @@ export function App() {
             <h1 className="brand-title">{t('title', language)}</h1>
             <p className="section-subtle mt-2">{t('subtitle', language)}</p>
           </div>
-          <LanguageToggle language={language} onChange={handleLanguageChange} />
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <LanguageToggle language={language} onChange={handleLanguageChange} />
+          </div>
         </header>
 
         <div className="space-y-6">
@@ -71,7 +75,7 @@ export function App() {
           </ReportTabs>
 
           {error && (
-            <div className="px-4 py-3 rounded-2xl border" style={{ background: 'color-mix(in srgb, var(--color-error) 10%, white)', borderColor: 'color-mix(in srgb, var(--color-error) 28%, transparent)', color: 'color-mix(in srgb, var(--color-error) 85%, black)' }}>
+            <div className="px-4 py-3 rounded-2xl border" style={{ background: 'color-mix(in srgb, var(--color-error) 10%, var(--color-base-100))', borderColor: 'color-mix(in srgb, var(--color-error) 28%, transparent)', color: 'color-mix(in srgb, var(--color-error) 85%, var(--color-base-content))' }}>
               {error}
             </div>
           )}

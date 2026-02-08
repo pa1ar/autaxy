@@ -108,7 +108,7 @@ export function BusinessSettings({ language, onSettingsChange }: BusinessSetting
           </div>
           <div className="mt-6 flex flex-col items-end gap-2">
             {saved && (
-              <span className="text-sm text-green-600">{t('settingsSaved', language)}</span>
+              <span className="text-sm text-green-600 dark:text-green-400">{t('settingsSaved', language)}</span>
             )}
             <div className="w-full flex items-center justify-between gap-4">
               <span className="text-sm section-subtle text-left">

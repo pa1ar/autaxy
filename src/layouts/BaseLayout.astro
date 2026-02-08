@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import ThemeScript from '../components/ThemeScript.astro';
 
 interface Props {
   title?: string;
@@ -11,6 +12,7 @@ const { title = 'Autaxy - Apple Financial Report to PDF' } = Astro.props;
 <!doctype html>
 <html lang="de">
   <head>
+    <ThemeScript />
     <meta charset="UTF-8" />
     <meta name="description" content="Convert Apple Financial Reports into tax-compliant PDF documents for German bookkeeping" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

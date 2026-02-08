@@ -1,0 +1,31 @@
+---
+// prevents flash of unstyled content
+---
+
+<script is:inline>
+  function getThemePreference() {
+    return localStorage.getItem('theme') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  }
+
+  function setTheme(theme) {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    localStorage.setItem('theme', theme);
+    document.dispatchEvent(new CustomEvent('theme-changed', { detail: theme }));
+  }
+
+  setTheme(getThemePreference());
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) {
+      setTheme(e.matches ? 'dark' : 'light');
+    }
+  });
+
+  window.toggleTheme = () => {
+    const current = getThemePreference();
+    const next = current === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    return next;
+  };
+</script>

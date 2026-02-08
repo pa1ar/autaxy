@@ -90,7 +90,7 @@ export function ReportUploader({ language, onTextChange, onProcess }: ReportUplo
             />
             {fileName ? (
               <div>
-                <div className="text-green-600 font-medium">{fileName}</div>
+                <div className="text-green-600 dark:text-green-400 font-medium">{fileName}</div>
                 <div className="text-sm section-subtle mt-1">Click to change file</div>
               </div>
             ) : (
@@ -102,7 +102,7 @@ export function ReportUploader({ language, onTextChange, onProcess }: ReportUplo
           </div>
 
           <div className="flex items-center justify-center section-subtle text-sm font-medium">
-            <span className="px-3 py-1 rounded-full border border-[color:color-mix(in_srgb,var(--color-base-content)_10%,transparent)] bg-white/70">
+            <span className="px-3 py-1 rounded-full border border-[color:color-mix(in_srgb,var(--color-base-content)_10%,transparent)] bg-[var(--color-base-100)]/70">
               {t('dropzoneOr', language)}
             </span>
           </div>
