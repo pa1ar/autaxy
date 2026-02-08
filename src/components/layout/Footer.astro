@@ -22,7 +22,7 @@ const yearDisplay = SITE.since !== currentYear ? `${SITE.since} - ${currentYear}
 
       {/* Quick Links */}
       <div>
-        <h3 class="mb-4 text-lg text-[var(--color-base-content)] font-serif">Quick Links</h3>
+        <h3 class="section-title">Quick Links</h3>
         <ul class="space-y-2 text-sm font-mono">
           {FOOTER_LINKS.quickLinks.map(link => (
             <li>
@@ -36,14 +36,14 @@ const yearDisplay = SITE.since !== currentYear ? `${SITE.since} - ${currentYear}
 
       {/* Connect */}
       <div>
-        <h3 class="mb-4 text-lg text-[var(--color-base-content)] font-serif">Connect</h3>
+        <h3 class="section-title">Connect</h3>
         <div class="flex space-x-4 mb-4">
           {SOCIAL_LINKS.map(social => (
             <a
               href={social.href}
               target="_blank"
               rel="noopener noreferrer"
-              class="text-[var(--color-neutral-content)] hover:text-[var(--color-primary)] transition-colors text-xl"
+              class="text-[var(--color-neutral-content)] hover:text-[var(--color-primary)] transition-colors text-base"
               aria-label={social.name}
             >
               <i class={social.icon}></i>
@@ -67,9 +67,9 @@ const yearDisplay = SITE.since !== currentYear ? `${SITE.since} - ${currentYear}
     </div>
 
     {/* Bottom bar */}
-    <div class="border-t border-[var(--color-base-300)]/50 pt-6 mt-6 text-sm text-[var(--color-neutral-content)] flex flex-col md:flex-row md:justify-between font-mono">
-      <p>&copy; {yearDisplay} {SITE.author}. All rights reserved.</p>
-      <div class="mt-2 md:mt-0 space-x-4">
+    <div class="border-t border-[var(--color-base-300)]/50 pt-6 mt-6 text-sm text-[var(--color-neutral-content)] grid grid-cols-1 md:grid-cols-3 gap-8 font-mono">
+      <p class="md:col-span-2">&copy; {yearDisplay} {SITE.author}. All rights reserved.</p>
+      <div class="space-x-4">
         {FOOTER_LINKS.legal.map(link => (
           <a href={link.href} class="hover:text-[var(--color-primary)] transition-colors">
             {link.label}

@@ -3,13 +3,15 @@ import { SITE, NAV_ITEMS, SOCIAL_LINKS } from "@/config";
 import ThemeToggle from "@/components/theme/ThemeToggle.astro";
 import Button from "@/components/ui/Button.astro";
 import CommandPalette from "@/components/search/CommandPalette";
+
+const home = SITE.homeUrl || "/";
 ---
 
 <header id="main-header" class="fixed top-0 left-0 right-0 z-50 bg-[var(--color-background)]/80 backdrop-blur-md border-b border-[var(--color-base-300)]/50">
   <div class="layout-container h-16 flex items-center justify-between relative">
 
     {/* Mobile: Logo (Left) */}
-    <a href="https://1ar.io/" class="lg:hidden flex-1 flex justify-start items-center shrink-0 text-left p-1 -ml-1 z-20">
+    <a href={home} class="lg:hidden flex-1 flex justify-start items-center shrink-0 text-left p-1 -ml-1 z-20">
       {SITE.logo && <img src={SITE.logo} alt={SITE.title} class="h-8 w-8" />}
       <span class="ml-2 font-serif text-lg text-[var(--color-base-content)]">1ar.io</span>
     </a>
@@ -29,22 +31,21 @@ import CommandPalette from "@/components/search/CommandPalette";
 
     {/* Mobile: CTA (Right) */}
     <div class="lg:hidden flex-1 flex justify-end items-center z-20">
-      <Button href="https://1ar.io/about" variant="light" size="sm">About</Button>
+      <Button href={`${SITE.homeUrl}/about`} variant="light" size="sm">About</Button>
     </div>
 
     {/* Desktop: Logo + Search */}
     <div class="hidden lg:flex items-center gap-3 shrink-0 z-10">
-      <a href="https://1ar.io/" class="logo-reveal flex items-center">
+      <a href={home} class="logo-link flex items-center">
         {SITE.logo && <img src={SITE.logo} alt={SITE.title} class="h-8 w-8" />}
-        <span class="ml-2 font-serif text-xl text-[var(--color-base-content)]">
-          <span class="logo-blur">pavel </span>1ar.io<span class="logo-blur">nov</span>
-        </span>
+        <span class="ml-2 font-serif text-xl text-[var(--color-base-content)]">1ar.io</span>
+        <span class="logo-tooltip">Pavel Larionov aka pa1ar</span>
       </a>
-      <CommandPalette client:load />
+      <CommandPalette baseUrl={SITE.homeUrl} client:load />
     </div>
 
     {/* Desktop: Centered Navigation */}
-    <nav class="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-6 font-mono z-0">
+    <nav class="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[calc(50%-2px)] items-center gap-6 font-mono z-0">
       {NAV_ITEMS.map(link => (
         <a href={link.href} class="text-[var(--color-base-content)] hover:text-[var(--color-primary)] transition-colors text-sm">
           {link.label}
@@ -53,7 +54,7 @@ import CommandPalette from "@/components/search/CommandPalette";
     </nav>
 
     {/* Desktop: Right Actions */}
-    <div class="hidden lg:flex items-center gap-4 z-10">
+    <div class="hidden lg:flex items-center gap-4 z-10 translate-y-[2px]">
       <nav class="flex items-center gap-2">
         {SOCIAL_LINKS.map(social => (
           <a
@@ -63,12 +64,12 @@ import CommandPalette from "@/components/search/CommandPalette";
             class="text-[var(--color-base-content)] hover:text-[var(--color-primary)] transition-colors"
             aria-label={social.name}
           >
-            <i class={`${social.icon} text-lg`}></i>
+            <i class={`${social.icon} text-base`}></i>
           </a>
         ))}
       </nav>
       <ThemeToggle />
-      <Button href="https://1ar.io/about" variant="light" size="sm">Reach out</Button>
+      <Button href={`${SITE.homeUrl}/contact`} variant="light" size="sm" class="font-normal">Contact</Button>
     </div>
   </div>
 
@@ -168,15 +169,31 @@ import CommandPalette from "@/components/search/CommandPalette";
     transform: rotate(180deg);
   }
 
-  .logo-blur {
-    display: inline;
-    filter: blur(4px);
-    opacity: 0.4;
-    transition: filter 0.3s ease, opacity 0.3s ease;
+  .logo-link {
+    position: relative;
   }
 
-  .logo-reveal:hover .logo-blur {
-    filter: blur(0);
+  .logo-tooltip {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 8px;
+    padding: 6px 12px;
+    font-family: ui-monospace, monospace;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    color: var(--color-base-content);
+    background: var(--color-base-200);
+    border: 1px solid var(--color-base-300);
+    border-radius: 6px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .logo-link:hover .logo-tooltip {
     opacity: 1;
+    transform: translateY(0);
   }
 </style>

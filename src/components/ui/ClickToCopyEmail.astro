@@ -11,9 +11,8 @@ const { userPart, domainPart, buttonText, class: className } = Astro.props;
 
 <button
   class:list={[
-    "font-mono text-sm py-1 px-2 rounded-md transition-all duration-200 ease-in-out group",
-    "bg-[var(--color-neutral)]/20 hover:bg-[var(--color-neutral)]/40 text-[var(--color-neutral-content)]",
-    "dark:bg-[var(--color-neutral-content)]/10 dark:hover:bg-[var(--color-neutral-content)]/20 dark:text-[var(--color-neutral-content)]",
+    "font-mono text-sm transition-colors duration-200 ease-in-out group cursor-pointer",
+    "text-[var(--color-neutral-content)] hover:text-[var(--color-primary)]",
     "focus:outline-none",
     className
   ]}
@@ -66,10 +65,10 @@ const { userPart, domainPart, buttonText, class: className } = Astro.props;
         confirmationTextSpan.textContent = 'Failed';
         confirmationTextSpan.style.display = 'inline';
         setTimeout(() => {
-          mainTextSpan.textContent = initialButtonText;
-          mainTextSpan.style.display = 'inline';
-          if (icon) icon.style.display = 'inline';
-          confirmationTextSpan.style.display = 'none';
+            mainTextSpan.textContent = initialButtonText;
+            mainTextSpan.style.display = 'inline';
+            if (icon) icon.style.display = 'inline';
+            confirmationTextSpan.style.display = 'none';
         }, 2000);
       }
     });

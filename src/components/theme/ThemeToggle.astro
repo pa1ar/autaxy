@@ -1,12 +1,12 @@
 ---
-// ThemeToggle - bridges with autaxy's window.toggleTheme() / theme-changed event
+// ThemeToggle - delegates to window.toggleTheme() / theme-changed from ThemeScript
 ---
 <button
   aria-label="Toggle theme"
   class="theme-toggle-control p-2 rounded text-[var(--color-base-content)] hover:text-[var(--color-primary)] transition-colors focus:outline-none"
 >
-  <i class="theme-icon-sun ri-sun-line"></i>
-  <i class="theme-icon-moon ri-moon-line hidden"></i>
+  <i class="theme-icon-sun ri-sun-line text-base"></i>
+  <i class="theme-icon-moon ri-moon-line text-base hidden"></i>
 </button>
 
 <script>

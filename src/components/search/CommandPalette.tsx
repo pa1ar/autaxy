@@ -2,8 +2,6 @@ import Fuse from "fuse.js";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
-const BASE = "https://1ar.io";
-
 interface SearchDocument {
   id: string;
   title: string;
@@ -23,7 +21,7 @@ function closePalette(setOpen: (open: boolean) => void, setQuery: (value: string
   setQuery("");
 }
 
-export default function CommandPalette() {
+export default function CommandPalette({ baseUrl = "" }: { baseUrl?: string }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -55,17 +53,18 @@ export default function CommandPalette() {
   }, []);
 
   useEffect(() => {
-    fetch(`${BASE}/search-index.json`)
+    const indexUrl = baseUrl ? `${baseUrl}/search-index.json` : "/search-index.json";
+    fetch(indexUrl)
       .then((response) => response.json())
       .then((payload) => {
         const documents = (payload.documents ?? []).map((doc: SearchDocument) => ({
           ...doc,
-          href: doc.href.startsWith("http") ? doc.href : `${BASE}${doc.href}`,
+          href: doc.href.startsWith("http") ? doc.href : `${baseUrl}${doc.href}`,
         }));
         setDocs(documents);
       })
       .catch(() => setDocs([]));
-  }, []);
+  }, [baseUrl]);
 
   const fuse = useMemo(
     () =>
@@ -116,10 +115,10 @@ export default function CommandPalette() {
       <button
         type="button"
         onClick={openPalette}
-        className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-base-300)] px-2 py-1 text-[10px] font-mono text-[var(--color-neutral-content)] hover:text-[var(--color-base-content)] hover:bg-[var(--color-base-200)] transition-colors"
+        className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-base-200)]/50 shadow-[inset_0_1px_3px_rgba(0,0,0,0.12)] px-2.5 h-8 pt-[3px] text-sm font-mono text-[var(--color-neutral-content)] hover:text-[var(--color-base-content)] hover:bg-[var(--color-base-200)] transition-colors"
         aria-label="Open command search"
       >
-        <i className="ri-search-line text-xs" />
+        <i className="ri-search-line text-sm" />
         <span className="hidden sm:inline">Search</span>
         <span className="inline-flex items-center gap-0.5">
           <kbd className="rounded border border-[var(--color-base-300)] bg-[var(--color-base-200)] px-1.5 py-0.5 text-[9px] leading-none text-[var(--color-base-content)]">

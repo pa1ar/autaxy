@@ -1,21 +1,23 @@
-const BASE = "https://1ar.io";
+import { SITE } from "./site";
+
+const h = SITE.homeUrl;
 
 export const NAV_ITEMS = [
-  { label: "Labs", href: `${BASE}/labs` },
-  { label: "Updates", href: `${BASE}/updates` },
-  { label: "Projects", href: `${BASE}/projects` },
-  { label: "About", href: `${BASE}/about` },
+  { label: "Labs", href: `${h}/labs` },
+  { label: "Updates", href: `${h}/updates` },
+  { label: "Projects", href: `${h}/projects` },
+  { label: "About", href: `${h}/about` },
 ] as const;
 
 export const FOOTER_LINKS = {
   quickLinks: [
-    { label: "Labs", href: `${BASE}/labs` },
-    { label: "Updates", href: `${BASE}/updates` },
-    { label: "Projects", href: `${BASE}/projects` },
-    { label: "About", href: `${BASE}/about` },
+    { label: "Labs", href: `${h}/labs` },
+    { label: "Updates", href: `${h}/updates` },
+    { label: "Projects", href: `${h}/projects` },
+    { label: "About", href: `${h}/about` },
   ],
   legal: [
-    { label: "Privacy Policy", href: `${BASE}/privacy` },
-    { label: "Terms of Service", href: `${BASE}/terms` },
+    { label: "Privacy Policy", href: `${h}/privacy` },
+    { label: "Terms of Service", href: `${h}/terms` },
   ],
 } as const;
