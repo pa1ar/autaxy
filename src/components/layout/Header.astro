@@ -1,0 +1,182 @@
+---
+import { SITE, NAV_ITEMS, SOCIAL_LINKS } from "@/config";
+import ThemeToggle from "@/components/theme/ThemeToggle.astro";
+import Button from "@/components/ui/Button.astro";
+import CommandPalette from "@/components/search/CommandPalette";
+---
+
+<header id="main-header" class="fixed top-0 left-0 right-0 z-50 bg-[var(--color-background)]/80 backdrop-blur-md border-b border-[var(--color-base-300)]/50">
+  <div class="layout-container h-16 flex items-center justify-between relative">
+
+    {/* Mobile: Logo (Left) */}
+    <a href="https://1ar.io/" class="lg:hidden flex-1 flex justify-start items-center shrink-0 text-left p-1 -ml-1 z-20">
+      {SITE.logo && <img src={SITE.logo} alt={SITE.title} class="h-8 w-8" />}
+      <span class="ml-2 font-serif text-lg text-[var(--color-base-content)]">1ar.io</span>
+    </a>
+
+    {/* Mobile: Centered Chevron Toggle */}
+    <div class="lg:hidden absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30">
+      <button
+        id="mobile-menu-toggle-chevron"
+        class="p-2 rounded-full text-base-content hover:bg-base-200/70 focus:outline-none transition-colors duration-150"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+        aria-controls="mobile-inline-menu"
+      >
+        <i id="icon-chevron" class="ri-arrow-down-s-line text-2xl block"></i>
+      </button>
+    </div>
+
+    {/* Mobile: CTA (Right) */}
+    <div class="lg:hidden flex-1 flex justify-end items-center z-20">
+      <Button href="https://1ar.io/about" variant="light" size="sm">About</Button>
+    </div>
+
+    {/* Desktop: Logo + Search */}
+    <div class="hidden lg:flex items-center gap-3 shrink-0 z-10">
+      <a href="https://1ar.io/" class="logo-reveal flex items-center">
+        {SITE.logo && <img src={SITE.logo} alt={SITE.title} class="h-8 w-8" />}
+        <span class="ml-2 font-serif text-xl text-[var(--color-base-content)]">
+          <span class="logo-blur">pavel </span>1ar.io<span class="logo-blur">nov</span>
+        </span>
+      </a>
+      <CommandPalette client:load />
+    </div>
+
+    {/* Desktop: Centered Navigation */}
+    <nav class="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 items-center gap-6 font-mono z-0">
+      {NAV_ITEMS.map(link => (
+        <a href={link.href} class="text-[var(--color-base-content)] hover:text-[var(--color-primary)] transition-colors text-sm">
+          {link.label}
+        </a>
+      ))}
+    </nav>
+
+    {/* Desktop: Right Actions */}
+    <div class="hidden lg:flex items-center gap-4 z-10">
+      <nav class="flex items-center gap-2">
+        {SOCIAL_LINKS.map(social => (
+          <a
+            href={social.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-[var(--color-base-content)] hover:text-[var(--color-primary)] transition-colors"
+            aria-label={social.name}
+          >
+            <i class={`${social.icon} text-lg`}></i>
+          </a>
+        ))}
+      </nav>
+      <ThemeToggle />
+      <Button href="https://1ar.io/about" variant="light" size="sm">Reach out</Button>
+    </div>
+  </div>
+
+  {/* Mobile Inline Menu */}
+  <div
+    id="mobile-inline-menu"
+    class="lg:hidden px-4 overflow-hidden max-h-0 opacity-0 transition-all duration-300 ease-in-out flex flex-col items-center bg-[var(--color-background)]/90 backdrop-blur-md"
+  >
+    <nav class="flex flex-col w-full items-center pt-4 pb-2 space-y-3">
+      {NAV_ITEMS.map((link) => (
+        <a
+          href={link.href}
+          class="block px-3 py-2 rounded-md text-base font-medium text-[var(--color-base-content)] hover:bg-[var(--color-base-200)] hover:text-[var(--color-primary)] transition-colors font-mono text-center"
+        >
+          {link.label}
+        </a>
+      ))}
+    </nav>
+    <hr class="border-[var(--color-base-300)]/50 my-3 w-full max-w-xs" />
+    <div class="py-2 flex justify-center">
+      <ThemeToggle />
+    </div>
+    <div class="pt-2 pb-4">
+      <div class="flex items-center justify-center gap-4">
+        {SOCIAL_LINKS.map((social) => (
+          <a
+            href={social.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-[var(--color-base-content)] hover:text-[var(--color-primary)] transition-colors text-xl"
+            aria-label={social.name}
+          >
+            <i class={social.icon}></i>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  const chevronMenuButton = document.getElementById('mobile-menu-toggle-chevron');
+  const mobileMenu = document.getElementById('mobile-inline-menu');
+  const iconChevron = document.getElementById('icon-chevron');
+
+  function openMobileMenu() {
+    if (!mobileMenu) return;
+    mobileMenu.style.maxHeight = `${mobileMenu.scrollHeight}px`;
+    mobileMenu.classList.remove('opacity-0');
+    mobileMenu.classList.add('opacity-100');
+    chevronMenuButton?.setAttribute('aria-expanded', 'true');
+    iconChevron?.classList.add('is-open');
+  }
+
+  function closeMobileMenu() {
+    if (!mobileMenu) return;
+    mobileMenu.style.maxHeight = '0px';
+    mobileMenu.classList.add('opacity-0');
+    mobileMenu.classList.remove('opacity-100');
+    chevronMenuButton?.setAttribute('aria-expanded', 'false');
+    iconChevron?.classList.remove('is-open');
+  }
+
+  chevronMenuButton?.addEventListener('click', (event) => {
+    event.stopPropagation();
+    const isOpen = chevronMenuButton.getAttribute('aria-expanded') === 'true';
+    if (isOpen) {
+      closeMobileMenu();
+    } else {
+      openMobileMenu();
+    }
+  });
+
+  mobileMenu?.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', closeMobileMenu);
+  });
+
+  document.addEventListener('click', (event) => {
+    const isOpen = chevronMenuButton?.getAttribute('aria-expanded') === 'true';
+    if (isOpen && mobileMenu && chevronMenuButton) {
+      const target = event.target as Node;
+      if (!mobileMenu.contains(target) && !chevronMenuButton.contains(target)) {
+        closeMobileMenu();
+      }
+    }
+  });
+</script>
+
+<style>
+  #icon-chevron {
+    display: block;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+  }
+
+  #icon-chevron.is-open {
+    transform: rotate(180deg);
+  }
+
+  .logo-blur {
+    display: inline;
+    filter: blur(4px);
+    opacity: 0.4;
+    transition: filter 0.3s ease, opacity 0.3s ease;
+  }
+
+  .logo-reveal:hover .logo-blur {
+    filter: blur(0);
+    opacity: 1;
+  }
+</style>

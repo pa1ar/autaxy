@@ -1,0 +1,47 @@
+---
+// ThemeToggle - bridges with autaxy's window.toggleTheme() / theme-changed event
+---
+<button
+  aria-label="Toggle theme"
+  class="theme-toggle-control p-2 rounded text-[var(--color-base-content)] hover:text-[var(--color-primary)] transition-colors focus:outline-none"
+>
+  <i class="theme-icon-sun ri-sun-line"></i>
+  <i class="theme-icon-moon ri-moon-line hidden"></i>
+</button>
+
+<script>
+  const themeToggleButtons = document.querySelectorAll('.theme-toggle-control');
+
+  function updateAllIcons(isDark: boolean) {
+    themeToggleButtons.forEach(btn => {
+      const sunIcon = btn.querySelector('.theme-icon-sun');
+      const moonIcon = btn.querySelector('.theme-icon-moon');
+      if (sunIcon && moonIcon) {
+        if (isDark) {
+          sunIcon.classList.add('hidden');
+          moonIcon.classList.remove('hidden');
+        } else {
+          sunIcon.classList.remove('hidden');
+          moonIcon.classList.add('hidden');
+        }
+      }
+    });
+  }
+
+  // sync icons on load
+  updateAllIcons(document.documentElement.classList.contains('dark'));
+
+  // listen for theme-changed from ThemeScript.astro
+  document.addEventListener('theme-changed', (e: Event) => {
+    updateAllIcons((e as CustomEvent).detail === 'dark');
+  });
+
+  // delegate to window.toggleTheme() from ThemeScript.astro
+  themeToggleButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (typeof window.toggleTheme === 'function') {
+        window.toggleTheme();
+      }
+    });
+  });
+</script>

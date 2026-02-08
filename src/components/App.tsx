@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { LanguageToggle } from './LanguageToggle';
-import { ThemeToggle } from './ThemeToggle';
 import { BusinessSettings } from './BusinessSettings';
 import { ReportUploader } from './ReportUploader';
 import { ReportPreview } from './ReportPreview';
@@ -58,7 +57,6 @@ export function App() {
             <p className="section-subtle mt-2">{t('subtitle', language)}</p>
           </div>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <LanguageToggle language={language} onChange={handleLanguageChange} />
           </div>
         </header>

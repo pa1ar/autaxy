@@ -1,0 +1,81 @@
+---
+import { SITE, FOOTER_LINKS, SOCIAL_LINKS } from "@/config";
+import ClickToCopyEmail from "@/components/ui/ClickToCopyEmail.astro";
+
+const currentYear = new Date().getFullYear();
+const yearDisplay = SITE.since !== currentYear ? `${SITE.since} - ${currentYear}` : `${currentYear}`;
+---
+
+<footer class="border-t border-[var(--color-base-300)]/50 mt-auto bg-[var(--color-base-200)]/30">
+  <div class="layout-container py-8">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* Brand */}
+      <div>
+        <div class="flex items-center gap-2 mb-4">
+          {SITE.logo && <img src={SITE.logo} alt={SITE.title} class="h-8 w-8" />}
+          <span class="font-serif text-xl text-[var(--color-base-content)]">{SITE.title}</span>
+        </div>
+        <p class="text-[var(--color-neutral-content)] text-sm">
+          {SITE.description}
+        </p>
+      </div>
+
+      {/* Quick Links */}
+      <div>
+        <h3 class="mb-4 text-lg text-[var(--color-base-content)] font-serif">Quick Links</h3>
+        <ul class="space-y-2 text-sm font-mono">
+          {FOOTER_LINKS.quickLinks.map(link => (
+            <li>
+              <a href={link.href} class="text-[var(--color-neutral-content)] hover:text-[var(--color-primary)] transition-colors">
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Connect */}
+      <div>
+        <h3 class="mb-4 text-lg text-[var(--color-base-content)] font-serif">Connect</h3>
+        <div class="flex space-x-4 mb-4">
+          {SOCIAL_LINKS.map(social => (
+            <a
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-[var(--color-neutral-content)] hover:text-[var(--color-primary)] transition-colors text-xl"
+              aria-label={social.name}
+            >
+              <i class={social.icon}></i>
+            </a>
+          ))}
+        </div>
+        {SITE.email && (
+          <div class="text-sm text-[var(--color-neutral-content)] font-mono">
+            <p class="flex items-center gap-1.5">
+              Contact:
+              <ClickToCopyEmail
+                userPart={SITE.email.user}
+                domainPart={SITE.email.domain}
+                buttonText="Copy Email"
+                class="text-xs"
+              />
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* Bottom bar */}
+    <div class="border-t border-[var(--color-base-300)]/50 pt-6 mt-6 text-sm text-[var(--color-neutral-content)] flex flex-col md:flex-row md:justify-between font-mono">
+      <p>&copy; {yearDisplay} {SITE.author}. All rights reserved.</p>
+      <div class="mt-2 md:mt-0 space-x-4">
+        {FOOTER_LINKS.legal.map(link => (
+          <a href={link.href} class="hover:text-[var(--color-primary)] transition-colors">
+            {link.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</footer>

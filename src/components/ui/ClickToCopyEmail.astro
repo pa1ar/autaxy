@@ -1,0 +1,77 @@
+---
+export interface Props {
+  userPart: string;
+  domainPart: string;
+  buttonText: string;
+  class?: string;
+}
+
+const { userPart, domainPart, buttonText, class: className } = Astro.props;
+---
+
+<button
+  class:list={[
+    "font-mono text-sm py-1 px-2 rounded-md transition-all duration-200 ease-in-out group",
+    "bg-[var(--color-neutral)]/20 hover:bg-[var(--color-neutral)]/40 text-[var(--color-neutral-content)]",
+    "dark:bg-[var(--color-neutral-content)]/10 dark:hover:bg-[var(--color-neutral-content)]/20 dark:text-[var(--color-neutral-content)]",
+    "focus:outline-none",
+    className
+  ]}
+  data-user-part={userPart}
+  data-domain-part={domainPart}
+  data-initial-text={buttonText}
+  aria-label="Copy contact email to clipboard"
+  type="button"
+>
+  <span class="main-text font-mono">{buttonText}</span>
+  <span class="confirmation-text" style="display: none;"></span>
+  <i class="ri-file-copy-line ml-1.5 text-xs opacity-70 group-hover:opacity-100 transition-opacity"></i>
+</button>
+
+<script>
+  document.querySelectorAll('[data-user-part][data-domain-part]').forEach(button => {
+    const mainTextSpan = button.querySelector('.main-text') as HTMLElement | null;
+    const confirmationTextSpan = button.querySelector('.confirmation-text') as HTMLElement | null;
+    const icon = button.querySelector('i') as HTMLElement | null;
+    const initialButtonText = button.getAttribute('data-initial-text');
+
+    if (!mainTextSpan || !confirmationTextSpan || !initialButtonText) return;
+
+    button.addEventListener('click', async () => {
+      const user = button.getAttribute('data-user-part');
+      const domain = button.getAttribute('data-domain-part');
+
+      if (!user || !domain) return;
+
+      const emailToCopy = `${user}@${domain}`;
+
+      try {
+        await navigator.clipboard.writeText(emailToCopy);
+
+        mainTextSpan.style.display = 'none';
+        if (icon) icon.style.display = 'none';
+        confirmationTextSpan.textContent = 'Copied!';
+        confirmationTextSpan.style.display = 'inline';
+
+        setTimeout(() => {
+          mainTextSpan.textContent = initialButtonText;
+          mainTextSpan.style.display = 'inline';
+          if (icon) icon.style.display = 'inline';
+          confirmationTextSpan.style.display = 'none';
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy email: ', err);
+        mainTextSpan.style.display = 'none';
+        if (icon) icon.style.display = 'none';
+        confirmationTextSpan.textContent = 'Failed';
+        confirmationTextSpan.style.display = 'inline';
+        setTimeout(() => {
+          mainTextSpan.textContent = initialButtonText;
+          mainTextSpan.style.display = 'inline';
+          if (icon) icon.style.display = 'inline';
+          confirmationTextSpan.style.display = 'none';
+        }, 2000);
+      }
+    });
+  });
+</script>
