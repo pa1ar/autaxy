@@ -3,6 +3,7 @@ import { SITE, NAV_ITEMS, SOCIAL_LINKS } from "@/config";
 import ThemeToggle from "@/components/theme/ThemeToggle.astro";
 import Button from "@/components/ui/Button.astro";
 import CommandPalette from "@/components/search/CommandPalette";
+import NavDropdown from "@/components/layout/NavDropdown.astro";
 
 const home = SITE.homeUrl || "/";
 ---
@@ -31,7 +32,7 @@ const home = SITE.homeUrl || "/";
 
     {/* Mobile: CTA (Right) */}
     <div class="lg:hidden flex-1 flex justify-end items-center z-20">
-      <Button href={`${SITE.homeUrl}/about`} variant="light" size="sm">About</Button>
+      <Button href={`${SITE.homeUrl}/contact`} variant="light" size="sm">Contact</Button>
     </div>
 
     {/* Desktop: Logo + Search */}
@@ -47,9 +48,13 @@ const home = SITE.homeUrl || "/";
     {/* Desktop: Centered Navigation */}
     <nav class="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[calc(50%-2px)] items-center gap-6 font-mono z-0">
       {NAV_ITEMS.map(link => (
-        <a href={link.href} class="text-[var(--color-base-content)] hover:text-[var(--color-primary)] transition-colors text-sm">
-          {link.label}
-        </a>
+        link.children ? (
+          <NavDropdown item={link} />
+        ) : (
+          <a href={link.href} class="text-[var(--color-base-content)] hover:text-[var(--color-primary)] transition-colors text-sm">
+            {link.label}
+          </a>
+        )
       ))}
     </nav>
 
@@ -76,19 +81,51 @@ const home = SITE.homeUrl || "/";
   {/* Mobile Inline Menu */}
   <div
     id="mobile-inline-menu"
-    class="lg:hidden px-4 overflow-hidden max-h-0 opacity-0 transition-all duration-300 ease-in-out flex flex-col items-center bg-[var(--color-background)]/90 backdrop-blur-md"
+    class="lg:hidden px-4 overflow-y-auto overflow-x-hidden max-h-0 opacity-0 transition-all duration-300 ease-in-out flex flex-col items-center bg-[var(--color-background)]/90 backdrop-blur-md"
+    style="scrollbar-gutter: stable both-edges;"
   >
-    <nav class="flex flex-col w-full items-center pt-4 pb-2 space-y-3">
+    <nav class="flex flex-col w-full items-center pt-4 pb-2 space-y-1">
       {NAV_ITEMS.map((link) => (
-        <a
-          href={link.href}
-          class="block px-3 py-2 rounded-md text-base font-medium text-[var(--color-base-content)] hover:bg-[var(--color-base-200)] hover:text-[var(--color-primary)] transition-colors font-mono text-center"
-        >
-          {link.label}
-        </a>
+        link.children ? (
+          <div class="mobile-accordion w-full max-w-xs">
+            <button
+              class="mobile-accordion-trigger flex items-center justify-center gap-1 w-full px-3 py-2 rounded-md text-base font-medium text-[var(--color-base-content)] hover:bg-[var(--color-base-200)] hover:text-[var(--color-primary)] transition-colors font-mono"
+              aria-expanded="false"
+            >
+              {link.label}
+              <i class="ri-arrow-down-s-line text-sm transition-transform duration-200"></i>
+            </button>
+            <div class="mobile-accordion-content overflow-hidden max-h-0 transition-all duration-200 ease-in-out">
+              <div class="flex flex-col items-center py-1 space-y-1">
+                {link.children.map((child) => (
+                  <a
+                    href={child.href}
+                    class="flex items-center gap-2 px-4 py-1.5 rounded-md text-sm text-[var(--color-base-content)] hover:bg-[var(--color-base-200)] hover:text-[var(--color-primary)] transition-colors font-mono"
+                    {...(child.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  >
+                    {child.favicon && (
+                      <img src={child.favicon} alt="" width="14" height="14" class="rounded-sm" />
+                    )}
+                    <span>{child.label}</span>
+                    {child.external && (
+                      <i class="ri-external-link-line text-[10px] opacity-40"></i>
+                    )}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <a
+            href={link.href}
+            class="block px-3 py-2 rounded-md text-base font-medium text-[var(--color-base-content)] hover:bg-[var(--color-base-200)] hover:text-[var(--color-primary)] transition-colors font-mono text-center"
+          >
+            {link.label}
+          </a>
+        )
       ))}
     </nav>
-    <hr class="border-[var(--color-base-300)]/50 my-3 w-full max-w-xs" />
+    <hr class="border-gray-300 dark:border-gray-600 my-3 w-full max-w-xs" />
     <div class="py-2 flex justify-center">
       <ThemeToggle />
     </div>
@@ -115,9 +152,30 @@ const home = SITE.homeUrl || "/";
   const mobileMenu = document.getElementById('mobile-inline-menu');
   const iconChevron = document.getElementById('icon-chevron');
 
+  let collapsedHeight = 0;
+
+  function getAvailableHeight() {
+    const header = mobileMenu?.closest('header');
+    const headerBottom = header ? header.getBoundingClientRect().bottom : 0;
+    return window.innerHeight - headerBottom;
+  }
+
+  function cappedHeight() {
+    if (!mobileMenu) return '0px';
+    const available = getAvailableHeight();
+    const natural = Math.max(mobileMenu.scrollHeight, collapsedHeight);
+    return `${Math.min(natural, available)}px`;
+  }
+
   function openMobileMenu() {
     if (!mobileMenu) return;
-    mobileMenu.style.maxHeight = `${mobileMenu.scrollHeight}px`;
+    // capture baseline height on first open (all accordions collapsed)
+    if (!collapsedHeight) {
+      mobileMenu.style.maxHeight = 'none';
+      collapsedHeight = mobileMenu.scrollHeight;
+      mobileMenu.style.maxHeight = '0px';
+    }
+    mobileMenu.style.maxHeight = cappedHeight();
     mobileMenu.classList.remove('opacity-0');
     mobileMenu.classList.add('opacity-100');
     chevronMenuButton?.setAttribute('aria-expanded', 'true');
@@ -147,6 +205,34 @@ const home = SITE.homeUrl || "/";
     link.addEventListener('click', closeMobileMenu);
   });
 
+  // mobile accordion for nav items with children
+  document.querySelectorAll('.mobile-accordion-trigger').forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const accordion = trigger.closest('.mobile-accordion');
+      const content = accordion?.querySelector('.mobile-accordion-content') as HTMLElement;
+      const icon = trigger.querySelector('i');
+      if (!content) return;
+
+      const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+      if (isOpen) {
+        content.style.maxHeight = '0px';
+        trigger.setAttribute('aria-expanded', 'false');
+        icon?.classList.remove('is-open');
+      } else {
+        content.style.maxHeight = `${content.scrollHeight}px`;
+        trigger.setAttribute('aria-expanded', 'true');
+        icon?.classList.add('is-open');
+      }
+
+      // update parent mobile menu max-height to accommodate expanded content
+      if (mobileMenu) {
+        requestAnimationFrame(() => {
+          mobileMenu.style.maxHeight = cappedHeight();
+        });
+      }
+    });
+  });
+
   document.addEventListener('click', (event) => {
     const isOpen = chevronMenuButton?.getAttribute('aria-expanded') === 'true';
     if (isOpen && mobileMenu && chevronMenuButton) {
@@ -166,6 +252,10 @@ const home = SITE.homeUrl || "/";
   }
 
   #icon-chevron.is-open {
+    transform: rotate(180deg);
+  }
+
+  .mobile-accordion-trigger i.is-open {
     transform: rotate(180deg);
   }
 

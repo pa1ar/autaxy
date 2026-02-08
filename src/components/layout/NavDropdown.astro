@@ -1,0 +1,173 @@
+---
+import type { NavItem } from "@/config";
+
+interface Props {
+  item: NavItem;
+}
+
+const { item } = Astro.props;
+const children = item.children ?? [];
+---
+
+<div class="nav-dropdown relative">
+  <button
+    class="nav-dropdown-trigger flex items-center gap-1 text-[var(--color-base-content)] hover:text-[var(--color-primary)] transition-colors text-sm font-mono"
+    aria-expanded="false"
+    aria-haspopup="true"
+  >
+    {item.label}
+    <i class="ri-arrow-down-s-line text-xs transition-transform duration-200"></i>
+  </button>
+
+  <div class="nav-dropdown-panel" role="menu">
+    {children.map((child) => (
+      <a
+        href={child.href}
+        class="nav-dropdown-item"
+        role="menuitem"
+        {...(child.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
+        {child.favicon && (
+          <img src={child.favicon} alt="" width="16" height="16" class="nav-dropdown-favicon" />
+        )}
+        <span class="nav-dropdown-label">{child.label}</span>
+        {child.external && (
+          <i class="ri-external-link-line text-xs opacity-40 ml-auto shrink-0"></i>
+        )}
+      </a>
+    ))}
+  </div>
+</div>
+
+<style>
+  .nav-dropdown-trigger {
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+  }
+
+  .nav-dropdown-trigger[aria-expanded="true"] i {
+    transform: rotate(180deg);
+  }
+
+  .nav-dropdown-panel {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    min-width: 200px;
+    padding: 6px;
+    border-radius: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+
+    background-color: var(--color-base-100);
+    border: 1px solid var(--color-base-300);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+
+  .nav-dropdown.is-open .nav-dropdown-panel {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+
+  .nav-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8125rem;
+    color: var(--color-base-content);
+    text-decoration: none;
+    transition: background 0.12s ease;
+    white-space: nowrap;
+  }
+
+  .nav-dropdown-item:hover {
+    background: #000;
+    color: var(--color-primary);
+  }
+
+  .nav-dropdown-item:hover .ri-external-link-line {
+    opacity: 0.7;
+  }
+
+  .nav-dropdown-favicon {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .nav-dropdown-label {
+    flex: 1;
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.nav-dropdown').forEach((dropdown) => {
+    const trigger = dropdown.querySelector('.nav-dropdown-trigger') as HTMLButtonElement;
+    if (!trigger) return;
+
+    let closeTimeout: ReturnType<typeof setTimeout>;
+
+    function open() {
+      clearTimeout(closeTimeout);
+      dropdown.classList.add('is-open');
+      trigger.setAttribute('aria-expanded', 'true');
+    }
+
+    function close() {
+      dropdown.classList.remove('is-open');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+
+    function scheduleClose() {
+      closeTimeout = setTimeout(close, 150);
+    }
+
+    // hover
+    dropdown.addEventListener('mouseenter', open);
+    dropdown.addEventListener('mouseleave', scheduleClose);
+
+    // click toggle
+    trigger.addEventListener('click', (e) => {
+      e.preventDefault();
+      const expanded = trigger.getAttribute('aria-expanded') === 'true';
+      if (expanded) close(); else open();
+    });
+
+    // keyboard
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const expanded = trigger.getAttribute('aria-expanded') === 'true';
+        if (expanded) close(); else open();
+      }
+      if (e.key === 'Escape') {
+        close();
+        trigger.focus();
+      }
+    });
+
+    // close on escape from within panel
+    dropdown.querySelector('.nav-dropdown-panel')?.addEventListener('keydown', (e) => {
+      if ((e as KeyboardEvent).key === 'Escape') {
+        close();
+        trigger.focus();
+      }
+    });
+
+    // close on outside click
+    document.addEventListener('click', (e) => {
+      if (!dropdown.contains(e.target as Node)) {
+        close();
+      }
+    });
+  });
+</script>

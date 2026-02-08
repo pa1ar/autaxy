@@ -144,7 +144,7 @@ footer {
 }
 
 .app-container {
-  width: min(72rem, 100%);
+  width: min(64rem, 100%);
   margin: 0 auto;
   padding: 2rem 1rem 3rem;
 }
