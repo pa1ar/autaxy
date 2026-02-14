@@ -131,8 +131,8 @@ footer {
   margin-top: calc(-1 * var(--header-height) - 1rem);
   padding-top: calc(var(--header-height) + 1rem);
   background:
-    radial-gradient(1200px 500px at 20% -10%, color-mix(in srgb, var(--color-primary) 18%, transparent), transparent),
-    radial-gradient(1000px 450px at 90% -20%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent),
+    radial-gradient(1200px 500px at 20% -90px, color-mix(in srgb, var(--color-primary) 18%, transparent), transparent),
+    radial-gradient(1000px 450px at 90% -180px, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent),
     linear-gradient(180deg, var(--color-base-100), var(--color-base-200));
 }
 
