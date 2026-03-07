@@ -65,6 +65,19 @@ export function parseSettingsFromUrl(): Partial<BusinessSettings> | null {
   return found ? overrides : null;
 }
 
+export function buildSettingsUrl(settings: BusinessSettings): string {
+  const params = new URLSearchParams();
+  for (const [param, field] of Object.entries(URL_PARAM_MAP)) {
+    const value = settings[field];
+    if (value && value !== defaultSettings[field]) {
+      params.set(param, value);
+    }
+  }
+  const base = typeof window !== 'undefined' ? window.location.origin + window.location.pathname : '';
+  const qs = params.toString();
+  return qs ? `${base}?${qs}` : base;
+}
+
 export function clearUrlParams(): void {
   if (typeof window === 'undefined') return;
   const url = new URL(window.location.href);

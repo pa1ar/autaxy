@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { ChevronsUpDown } from 'lucide-react';
-import { loadSettings, saveSettings, type BusinessSettings as Settings } from '../lib/storage';
+import { loadSettings, saveSettings, buildSettingsUrl, type BusinessSettings as Settings } from '../lib/storage';
 import { trackSettingsSaved } from '../lib/analytics';
 import type { Language } from '../lib/i18n';
 import { t } from '../lib/i18n';
@@ -18,6 +18,7 @@ export function BusinessSettings({ language, initialSettings, onSettingsChange }
   const [settings, setSettings] = useState<Settings>(() => initialSettings ?? loadSettings());
   const [saved, setSaved] = useState(false);
   const [expanded, setExpanded] = useState(true);
+  const [urlCopied, setUrlCopied] = useState(false);
 
   const handleChange = (field: keyof Settings) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setSettings((prev) => ({ ...prev, [field]: e.target.value }));
@@ -30,6 +31,17 @@ export function BusinessSettings({ language, initialSettings, onSettingsChange }
     trackSettingsSaved(Boolean(settings.vatId));
     onSettingsChange?.(settings);
     setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleCopyUrl = async () => {
+    const url = buildSettingsUrl(settings);
+    try {
+      await navigator.clipboard.writeText(url);
+      setUrlCopied(true);
+      setTimeout(() => setUrlCopied(false), 2000);
+    } catch {
+      // fallback: select text
+    }
   };
 
   return (
@@ -112,6 +124,17 @@ export function BusinessSettings({ language, initialSettings, onSettingsChange }
                 Details are saved locally in your browser local storage. We never store anything or share with anyone the data that you enter on this page.
               </span>
               <Button onClick={handleSave}>{t('saveSettings', language)}</Button>
+            </div>
+            <div className="w-full text-sm section-subtle text-left">
+              {language === 'de' ? 'Details als Link kopieren, um die Felder beim nächsten Mal automatisch auszufüllen: ' : 'Copy your details as a link to auto-fill the fields next time: '}
+              <button
+                type="button"
+                onClick={handleCopyUrl}
+                className="inline font-mono text-sm cursor-pointer transition-colors duration-200 border-b border-dotted border-current hover:text-[var(--color-primary)]"
+              >
+                {urlCopied ? (language === 'de' ? 'Kopiert!' : 'Copied!') : (language === 'de' ? 'URL kopieren' : 'Copy URL')}
+                {!urlCopied && <i className="ri-file-copy-line ml-1 text-xs opacity-70" />}
+              </button>
             </div>
           </div>
           </CardContent>
