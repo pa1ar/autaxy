@@ -221,6 +221,9 @@ export function generatePreviewHtml(
         <span>${t('pdfReportId', lang)}:</span> <span>${data.reportId}</span>
       </div>
       <div style="${S.detailsRow}">
+        <span>Belegnummer:</span> <span>${data.reportId}</span>
+      </div>
+      <div style="${S.detailsRow}">
         <span>${t('pdfDate', lang)}:</span> <span>${data.endDate}</span>
       </div>
       <div style="${S.detailsRow}">
