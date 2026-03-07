@@ -11,7 +11,16 @@ import { trackPageView, trackReportParsed } from '../lib/analytics';
 
 export function App() {
   const [language, setLang] = useState<Language>('de');
-  const [settings, setSettings] = useState<Settings>(() => loadSettings());
+  const [settings, setSettings] = useState<Settings>(() => {
+    const base = loadSettings();
+    const urlOverrides = parseSettingsFromUrl();
+    if (urlOverrides) {
+      const merged = { ...base, ...urlOverrides };
+      saveSettings(merged);
+      return merged;
+    }
+    return base;
+  });
   const [reportText, setReportText] = useState('');
   const [reportData, setReportData] = useState<AppleReportData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -19,15 +28,7 @@ export function App() {
   useEffect(() => {
     const lang = getDefaultLanguage();
     setLang(lang);
-
-    const urlOverrides = parseSettingsFromUrl();
-    if (urlOverrides) {
-      const merged = { ...loadSettings(), ...urlOverrides };
-      saveSettings(merged);
-      setSettings(merged);
-    }
     clearUrlParams();
-
     trackPageView(lang, hasSettings());
   }, []);
 
@@ -71,7 +72,7 @@ export function App() {
         </header>
 
         <div className="space-y-6">
-          <BusinessSettings language={language} onSettingsChange={handleSettingsChange} />
+          <BusinessSettings language={language} initialSettings={settings} onSettingsChange={handleSettingsChange} />
 
           <ReportTabs language={language}>
             <ReportUploader

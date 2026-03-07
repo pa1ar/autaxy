@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/Card';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
@@ -10,17 +10,14 @@ import { t } from '../lib/i18n';
 
 interface BusinessSettingsProps {
   language: Language;
+  initialSettings?: Settings;
   onSettingsChange?: (settings: Settings) => void;
 }
 
-export function BusinessSettings({ language, onSettingsChange }: BusinessSettingsProps) {
-  const [settings, setSettings] = useState<Settings>(() => loadSettings());
+export function BusinessSettings({ language, initialSettings, onSettingsChange }: BusinessSettingsProps) {
+  const [settings, setSettings] = useState<Settings>(() => initialSettings ?? loadSettings());
   const [saved, setSaved] = useState(false);
   const [expanded, setExpanded] = useState(true);
-
-  useEffect(() => {
-    setSettings(loadSettings());
-  }, []);
 
   const handleChange = (field: keyof Settings) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setSettings((prev) => ({ ...prev, [field]: e.target.value }));
