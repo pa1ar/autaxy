@@ -159,6 +159,12 @@ export type TranslationKey = keyof typeof translations.de;
 
 export function getDefaultLanguage(): Language {
   if (typeof window === 'undefined') return 'de';
+  const params = new URLSearchParams(window.location.search);
+  const urlLang = params.get('lang');
+  if (urlLang === 'de' || urlLang === 'en') {
+    setLanguage(urlLang);
+    return urlLang;
+  }
   const stored = localStorage.getItem('autaxy_language');
   if (stored === 'de' || stored === 'en') return stored;
   const browserLang = navigator.language.slice(0, 2);

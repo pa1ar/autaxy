@@ -5,7 +5,7 @@ import { ReportUploader } from './ReportUploader';
 import { ReportPreview } from './ReportPreview';
 import { ReportTabs } from './ReportTabs';
 import { getDefaultLanguage, setLanguage, type Language, t } from '../lib/i18n';
-import { loadSettings, hasSettings, type BusinessSettings as Settings } from '../lib/storage';
+import { loadSettings, saveSettings, hasSettings, parseSettingsFromUrl, clearUrlParams, type BusinessSettings as Settings } from '../lib/storage';
 import { parseAppleReport, type AppleReportData } from '../lib/parsers/apple';
 import { trackPageView, trackReportParsed } from '../lib/analytics';
 
@@ -19,6 +19,15 @@ export function App() {
   useEffect(() => {
     const lang = getDefaultLanguage();
     setLang(lang);
+
+    const urlOverrides = parseSettingsFromUrl();
+    if (urlOverrides) {
+      const merged = { ...loadSettings(), ...urlOverrides };
+      saveSettings(merged);
+      setSettings(merged);
+    }
+    clearUrlParams();
+
     trackPageView(lang, hasSettings());
   }, []);
 

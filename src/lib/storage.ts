@@ -39,3 +39,37 @@ export function hasSettings(): boolean {
   const settings = loadSettings();
   return Boolean(settings.companyName && settings.street && settings.zipCity);
 }
+
+const URL_PARAM_MAP: Record<string, keyof BusinessSettings> = {
+  company: 'companyName',
+  street: 'street',
+  zip: 'zipCity',
+  country: 'country',
+  vat: 'vatId',
+  vendor: 'appleVendorId',
+  email: 'contactEmail',
+};
+
+export function parseSettingsFromUrl(): Partial<BusinessSettings> | null {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(window.location.search);
+  const overrides: Partial<BusinessSettings> = {};
+  let found = false;
+  for (const [param, field] of Object.entries(URL_PARAM_MAP)) {
+    const value = params.get(param);
+    if (value !== null) {
+      overrides[field] = value;
+      found = true;
+    }
+  }
+  return found ? overrides : null;
+}
+
+export function clearUrlParams(): void {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+  if (url.search) {
+    url.search = '';
+    window.history.replaceState({}, '', url.pathname);
+  }
+}
