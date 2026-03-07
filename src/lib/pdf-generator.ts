@@ -153,38 +153,91 @@ export function generatePreviewHtml(
   const isPositive = totalAmount >= 0;
   const bookingHint = isPositive ? t('pdfRevenueHint', lang) : t('pdfRefundHint', lang);
 
-  let pos = 1;
-  const tableRows = data.transactions.map((tx) => {
-    let description = `${tx.title} - ${tx.country}`;
-    if (tx.sku) description += ` (${tx.sku})`;
-    if (tx.originalCurrency && tx.originalCurrency !== 'EUR') {
-      description += ` [${formatAmountGerman(tx.customerPrice)} ${tx.originalCurrency}]`;
-    }
+  // group transactions by bank currency
+  const byCurrency: Record<string, typeof data.transactions> = {};
+  for (const tx of data.transactions) {
+    const cur = tx.currency || 'EUR';
+    if (!byCurrency[cur]) byCurrency[cur] = [];
+    byCurrency[cur].push(tx);
+  }
+  const currencies = Object.keys(byCurrency);
 
-    let individualPrice: number;
-    let quantityDisplay: string | number = tx.quantity;
-    let unitLabel = t('pdfUnitPiece', lang);
+  function buildTableRows(transactions: typeof data.transactions) {
+    let pos = 1;
+    return transactions.map((tx) => {
+      let description = `${tx.title} - ${tx.country}`;
+      if (tx.sku) description += ` (${tx.sku})`;
+      if (tx.originalCurrency && tx.originalCurrency !== tx.currency) {
+        description += ` [${formatAmountGerman(tx.customerPrice)} ${tx.originalCurrency}]`;
+      }
 
-    if (tx.quantity > 0) {
-      individualPrice = Math.round((tx.partnerShare / tx.quantity) * 100) / 100;
-    } else {
-      individualPrice = tx.partnerShare;
-      quantityDisplay = '-';
-      unitLabel = t('pdfUnitCorrection', lang);
-      description += ` ${t('pdfRefundNote', lang)}`;
-    }
+      let individualPrice: number;
+      let quantityDisplay: string | number = tx.quantity;
+      let unitLabel = t('pdfUnitPiece', lang);
 
-    return {
-      pos: pos++,
-      description,
-      quantity: quantityDisplay,
-      unit: unitLabel,
-      price: formatAmountGerman(individualPrice),
-      total: formatAmountGerman(tx.partnerShare)
-    };
-  });
+      if (tx.quantity > 0) {
+        individualPrice = Math.round((tx.partnerShare / tx.quantity) * 100) / 100;
+      } else {
+        individualPrice = tx.partnerShare;
+        quantityDisplay = '-';
+        unitLabel = t('pdfUnitCorrection', lang);
+        description += ` ${t('pdfRefundNote', lang)}`;
+      }
 
-  const calculatedTotal = data.transactions.reduce((sum, tx) => sum + tx.partnerShare, 0);
+      return {
+        pos: pos++,
+        description,
+        quantity: quantityDisplay,
+        unit: unitLabel,
+        price: formatAmountGerman(individualPrice),
+        total: formatAmountGerman(tx.partnerShare)
+      };
+    });
+  }
+
+  function buildCurrencyBlock(currency: string, transactions: typeof data.transactions) {
+    const rows = buildTableRows(transactions);
+    const subtotal = transactions.reduce((sum, tx) => sum + tx.partnerShare, 0);
+    const sectionLabel = currencies.length > 1
+      ? `<p style="font-size: 9px; font-weight: bold; margin: 15px 0 5px 0;">${lang === 'de' ? 'Auszahlung' : 'Payout'} ${currency}</p>`
+      : '';
+
+    return `
+    ${sectionLabel}
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th style="width: 8%;">${t('pdfPos', lang)}</th>
+          <th style="width: 50%;">${t('pdfDescription', lang)}</th>
+          <th class="al-r" style="width: 10%;">${t('pdfQuantity', lang)}</th>
+          <th class="al-c" style="width: 12%;">${t('pdfUnit', lang)}</th>
+          <th class="al-r" style="width: 10%;">${t('pdfUnitPrice', lang)}</th>
+          <th class="al-r" style="width: 10%;">${t('pdfTotal', lang)} ${currency}</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(row => `
+        <tr>
+          <td>${row.pos}</td>
+          <td>${row.description}</td>
+          <td class="al-r">${row.quantity}</td>
+          <td class="al-c">${row.unit}</td>
+          <td class="al-r">${row.price}</td>
+          <td class="al-r">${row.total}</td>
+        </tr>
+        `).join('')}
+      </tbody>
+    </table>
+    <div style="${S.summarySection}">
+      <div style="${S.summaryBox}">
+        <div style="${S.summaryTotal}">
+          <strong>${t('pdfSubtotal', lang)} ${currency}</strong>
+          <strong>${formatAmountGerman(subtotal)} ${currency}</strong>
+        </div>
+      </div>
+    </div>`;
+  }
+
   const recipient = [
     settings.companyName,
     settings.street,
@@ -233,49 +286,13 @@ export function generatePreviewHtml(
   </div>
 
   <h2 style="${S.title}">${t('pdfTitle', lang)} ${data.reportId}</h2>
-  <p style="${S.subtitle}">${t('pdfSubtitle', lang)} (${lang === 'de' ? 'Quelle' : 'Source'}: Apple Financial Report)</p>
+  <p style="${S.subtitle}">${t('pdfDocTypeValue', lang)}</p>
   <p style="${S.bookingHint}"><strong>${t('pdfBookingHint', lang)}:</strong> ${bookingHint}</p>
 
-  <table class="invoice-table">
-    <thead>
-      <tr>
-        <th style="width: 8%;">${t('pdfPos', lang)}</th>
-        <th style="width: 50%;">${t('pdfDescription', lang)}</th>
-        <th class="al-r" style="width: 10%;">${t('pdfQuantity', lang)}</th>
-        <th class="al-c" style="width: 12%;">${t('pdfUnit', lang)}</th>
-        <th class="al-r" style="width: 10%;">${t('pdfUnitPrice', lang)}</th>
-        <th class="al-r" style="width: 10%;">${t('pdfTotal', lang)}</th>
-      </tr>
-    </thead>
-    <tbody>
-      ${tableRows.map(row => `
-      <tr>
-        <td>${row.pos}</td>
-        <td>${row.description}</td>
-        <td class="al-r">${row.quantity}</td>
-        <td class="al-c">${row.unit}</td>
-        <td class="al-r">${row.price}</td>
-        <td class="al-r">${row.total}</td>
-      </tr>
-      `).join('')}
-    </tbody>
-  </table>
-
-  <div style="${S.summarySection}">
-    <div style="${S.summaryBox}">
-      <div style="${S.summaryRow}">
-        <span>${t('pdfSubtotal', lang)}</span>
-        <span>${formatAmountGerman(calculatedTotal)} EUR</span>
-      </div>
-      <div style="${S.summaryTotal}">
-        <strong>${t('pdfGrandTotal', lang)}</strong>
-        <strong>${formatAmountGerman(totalAmount)} EUR</strong>
-      </div>
-    </div>
-  </div>
+  ${currencies.map(cur => buildCurrencyBlock(cur, byCurrency[cur])).join('')}
 
   <div style="${S.taxNote}">
-    <strong>Steuerhinweis:</strong> ${t('pdfTaxNote', lang)}
+    <strong>${lang === 'de' ? 'Steuerhinweis' : 'Tax note'}:</strong> ${t('pdfTaxNote', lang)}
   </div>
 
   <div style="${S.footer}">
