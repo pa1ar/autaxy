@@ -88,31 +88,56 @@ function parseCSVReport(text: string): AppleReportData {
     data.endDate = `${lastDay}.${monthNum}.${year}`;
   }
 
-  // CSV columns: 0=Country, 1=Units, 2=Earned, 3=InputTax, 4=Adjustments,
-  //              5=WithholdingTax, 6=TotalOwed, 7=Proceeds, 8=BankAccountCurrency, 9=(empty/trailing)
-  // report may contain multiple currency blocks separated by summary lines + headers
+  // find header row and resolve column indices dynamically
+  // Apple CSV formats vary: some have "Pre-Tax Subtotal" and "Exchange Rate", some don't
+  let colProceeds = -1;
+  let colBankCurrency = -1;
+  let colUnits = 1;
+  let colEarned = 2;
+  let headerFound = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].includes('Country or Region')) {
+      const headers = parseCSVLine(lines[i]);
+      for (let j = 0; j < headers.length; j++) {
+        const h = headers[j].toLowerCase().trim();
+        if (h === 'proceeds') colProceeds = j;
+        if (h === 'bank account currency') colBankCurrency = j;
+        if (h === 'units sold') colUnits = j;
+        if (h === 'earned') colEarned = j;
+      }
+      headerFound = true;
+      break;
+    }
+  }
+
+  // fallback for older formats without explicit header match
+  if (colProceeds === -1) colProceeds = 7;
+  if (colBankCurrency === -1) colBankCurrency = colProceeds + 1;
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line || line.startsWith(',,,')) continue;
 
-    // skip header rows and summary/label lines
     if (line.includes('iTunes Connect') || line.includes('Country or Region')) continue;
-    if (line.includes('Estimated Proceeds')) continue;
+    if (line.includes('Estimated Proceeds') || line.includes('Paid to')) continue;
 
     const values = parseCSVLine(line);
-    if (values.length < 8) continue;
+    if (values.length < colProceeds + 1) continue;
 
     const countryRegion = values[0];
     if (!countryRegion) continue;
 
-    const units = parseInt(values[1]) || 0;
-    if (units === 0 && !values[1]) continue;
+    const units = parseInt(values[colUnits]) || 0;
+    if (units === 0 && !values[colUnits]) continue;
 
-    const earned = parseFloat(values[2]) || 0;
-    const proceeds = parseFloat(values[7]) || 0;
-    const bankCurrency = values[8] || 'EUR';
+    const earned = parseFloat(values[colEarned]) || 0;
+    const proceeds = parseFloat(values[colProceeds]) || 0;
+    const bankCurrency = values[colBankCurrency]?.trim() || 'EUR';
 
-    // extract country and original currency from format "Country (USD)"
+    // validate bankCurrency is a 3-letter code, not a number
+    const validCurrency = /^[A-Z]{3}$/.test(bankCurrency) ? bankCurrency : 'EUR';
+
     const countryMatch = countryRegion.match(/^(.*?)\s*\(([A-Z]{3})\)$/);
     const country = countryMatch ? countryMatch[1] : countryRegion;
     const originalCurrency = countryMatch ? countryMatch[2] : 'EUR';
@@ -125,13 +150,13 @@ function parseCSVReport(text: string): AppleReportData {
       country,
       quantity: units,
       partnerShare: proceeds,
-      currency: bankCurrency,
+      currency: validCurrency,
       customerPrice: earned,
       originalCurrency
     };
 
     data.transactions.push(transaction);
-    if (bankCurrency === 'EUR') {
+    if (validCurrency === 'EUR') {
       data.summary.totalPartnerShare += proceeds;
     }
   }
