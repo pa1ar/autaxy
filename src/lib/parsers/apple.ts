@@ -84,24 +84,33 @@ function parseCSVReport(text: string): AppleReportData {
     const monthNum = getMonthNumber(month);
     data.reportId = `APPLE-${year}-${monthNum}`;
     data.startDate = `01.${monthNum}.${year}`;
-    // get last day of month
     const lastDay = new Date(parseInt(year), parseInt(monthNum), 0).getDate();
     data.endDate = `${lastDay}.${monthNum}.${year}`;
   }
 
-  // parse transactions (lines 4+ contain data after header rows)
-  for (let i = 3; i < lines.length; i++) {
+  // CSV columns: 0=Country, 1=Units, 2=Earned, 3=InputTax, 4=Adjustments,
+  //              5=WithholdingTax, 6=TotalOwed, 7=Proceeds, 8=BankAccountCurrency, 9=(empty/trailing)
+  // report may contain multiple currency blocks separated by summary lines + headers
+  for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (!line || line.startsWith(',,,')) break;
+    if (!line || line.startsWith(',,,')) continue;
+
+    // skip header rows and summary/label lines
+    if (line.includes('iTunes Connect') || line.includes('Country or Region')) continue;
+    if (line.includes('Estimated Proceeds')) continue;
 
     const values = parseCSVLine(line);
     if (values.length < 8) continue;
 
-    const countryRegion = values[0].replace(/"/g, '');
-    const units = parseInt(values[1].replace(/"/g, '')) || 0;
-    const earned = parseFloat(values[2].replace(/"/g, '')) || 0;
-    const proceeds = parseFloat(values[9]?.replace(/"/g, '')) || 0;
-    const currency = values[10]?.replace(/"/g, '') || 'EUR';
+    const countryRegion = values[0];
+    if (!countryRegion) continue;
+
+    const units = parseInt(values[1]) || 0;
+    if (units === 0 && !values[1]) continue;
+
+    const earned = parseFloat(values[2]) || 0;
+    const proceeds = parseFloat(values[7]) || 0;
+    const bankCurrency = values[8] || 'EUR';
 
     // extract country and original currency from format "Country (USD)"
     const countryMatch = countryRegion.match(/^(.*?)\s*\(([A-Z]{3})\)$/);
@@ -116,22 +125,27 @@ function parseCSVReport(text: string): AppleReportData {
       country,
       quantity: units,
       partnerShare: proceeds,
-      currency: 'EUR',
+      currency: bankCurrency,
       customerPrice: earned,
       originalCurrency
     };
 
     data.transactions.push(transaction);
-    data.summary.totalPartnerShare += proceeds;
+    if (bankCurrency === 'EUR') {
+      data.summary.totalPartnerShare += proceeds;
+    }
   }
 
-  // extract total from summary line if present
-  const totalLine = lines[7];
-  if (totalLine && totalLine.includes('EUR')) {
-    const totalMatch = totalLine.match(/"([\d.]+)\s*EUR"/);
-    if (totalMatch) {
-      data.summary.totalPartnerShare = parseFloat(totalMatch[1]);
+  // sum EUR proceeds from summary lines as fallback/override
+  let eurTotal = 0;
+  for (const line of lines) {
+    const totalMatch = line.match(/"?([\d.]+)\s*EUR"?/);
+    if (totalMatch && !line.includes('Country or Region')) {
+      eurTotal = Math.max(eurTotal, parseFloat(totalMatch[1]));
     }
+  }
+  if (eurTotal > 0) {
+    data.summary.totalPartnerShare = eurTotal;
   }
 
   return data;
