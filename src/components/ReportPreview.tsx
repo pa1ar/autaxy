@@ -29,7 +29,11 @@ export function ReportPreview({ data, settings, language }: ReportPreviewProps) 
     if (!doc) return;
 
     doc.open();
-    doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Autaxy - tax automation by 1ar labs</title><style>${PDF_BASE_CSS}${TABLE_CSS}${PDF_PRINT_CSS}</style></head><body>${html}</body></html>`);
+    // endDate is DD.MM.YYYY, convert to YYYY-MM-DD for filename
+    const parts = data.endDate.split('.');
+    const isoDate = parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : data.endDate;
+    const pdfTitle = `${isoDate} Apple App Store Report - autaxy by 1ar.io`;
+    doc.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${pdfTitle}</title><style>${PDF_BASE_CSS}${TABLE_CSS}${PDF_PRINT_CSS}</style></head><body>${html}</body></html>`);
     doc.close();
 
     // adjust iframe height to content
